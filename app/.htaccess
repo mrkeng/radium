@@ -1,0 +1,12 @@
+#
+# radium: the most RAD php framework
+#
+# @copyright Copyright 2010, Playwell Inc.
+# @license   http://opensource.org/licenses/bsd-license.php The BSD License
+#
+
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteRule  ^$   webroot/    [L]
+    RewriteRule  (.*) webroot/$1  [L]
+</IfModule>

@@ -1,0 +1,27 @@
+@charset "UTF-8";
+
+body,
+th,td,
+h1,h2,h3,h4,h5,h6
+{
+	font-family: sans-serif;
+	color: #222;
+}
+body
+{
+	margin: 0;
+	padding: 20px;
+}
+section, nav, article, aside, hgroup, header, footer, figure, figcaption { display: block; }
+table
+{
+	border-collapse: collapse;
+	border-spacing: 0;
+	width: 100%;
+}
+th,td
+{
+	vertical-align: top;
+	padding: 3px 5px;
+	border: 1px solid #999;
+}

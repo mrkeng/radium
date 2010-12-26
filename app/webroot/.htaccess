@@ -1,0 +1,14 @@
+#
+# radium: the most RAD php framework
+#
+# @copyright Copyright 2010, Playwell Inc.
+# @license   http://opensource.org/licenses/bsd-license.php The BSD License
+#
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !favicon.ico$
+    RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+</IfModule>

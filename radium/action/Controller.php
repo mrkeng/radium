@@ -1,0 +1,151 @@
+<?php
+/**
+ * radium: the most RAD php framework
+ *
+ * @copyright Copyright 2010, Playwell Inc.
+ * @license   http://opensource.org/licenses/bsd-license.php The BSD License
+ */
+
+namespace radium\action;
+
+use \radium\action\Dispatcher;
+use \radium\core\Object;
+use \radium\net\http\Request;
+use \radium\template\View;
+use \radium\utils\StringUtil;
+
+/**
+ * コントローラのベースクラス
+ */
+class Controller extends Object
+{
+	public $view;
+	public $request;
+	public $dispatcher;
+	public $_controller;
+	public $_render;
+	protected $_renderedContent = '';
+	protected $_params;
+	
+	/**
+	 * コンストラクタ
+	 * @param \radium\net\http\Request $request
+	 */
+	public function __construct(Request $request, Dispatcher $dispatcher = null)
+	{
+		$this->request = $request;
+		$this->dispatcher = $dispatcher;
+		
+		$class = get_class($this);
+		$class = substr($class, strrpos($class, '\\') + 1);
+		$class = substr($class, 0, strrpos($class, 'Controller'));
+		
+		$this->_controller = StringUtil::uncamelcase($class);
+				
+		$this->_render = array();
+		$this->_params = array();
+	}
+	
+	/**
+	 * アクションの前に呼ばれる初期化処理
+	 */
+	protected function _init()
+	{
+	}
+	
+	/**
+	 * テンプレートに送るデータをセット
+	 */
+	protected function params($name, $value = null, $force = false) {
+		if ($value !== null || $force)
+		{
+			$this->_params[$name] = $value;
+		}
+		
+		return isset($this->_params[$name]) ? $this->_params[$name] : null;
+	}
+	
+	/**
+	 * JSON 出力
+	 * @param array $json
+	 */
+	final public function json(array $json)
+	{
+		$this->render(array('json' => $json));
+	}
+	
+	/**
+	 * レンダリング
+	 * @param array $options
+	 */
+	final public function render(array $options = array())
+	{
+		if ($this->_renderedContent) return;
+		
+		$default = array(
+			'type' => 'html',
+			'layout' => 'default',
+			'controller' => $this->_controller,
+			'template' => null,
+			'data' => array()
+		);
+		
+		$options += $this->_render;
+		$options += $default;
+		$options['data'] += $this->_params;
+		
+		// レンダリング処理
+		$view = new View($this, $options);
+		$this->_renderedContent = $view->render();
+		
+		$this->view = $view;
+	}
+	
+	/**
+	 * リダイレクト
+	 * @param string $url
+	 */
+	final public function redirect($url)
+	{
+		$to = $url;
+		if (!preg_match('/^(https?|mailto):\\/\\//', $url))
+		{
+			$url = preg_replace('/^\\//', '', $url);
+			
+			$server = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'];
+			
+			$to = $server . APP_BASE_PATH . $url;
+		}
+		
+		header('Location: ' . $to);
+		
+		$this->_stop();
+	}
+	
+	/**
+	 * 他のコントローラのアクションを呼ぶ
+	 */
+	final public function call($controller, $action, array $args = array())
+	{
+		echo $this->dispatcher->dispatch($controller, $action, $args);
+		$this->_stop();
+	}
+	
+	/**
+	 * レンダリング済みコンテンツを取得
+	 */
+	final public function renderedContent()
+	{
+		return $this->_renderedContent;
+	}
+	
+	/**
+	 * ファイナライズ
+	 */
+	final protected function _finalize(array $data = array())
+	{
+		$this->render(array(
+			'data' => $data
+		));
+	}
+}
