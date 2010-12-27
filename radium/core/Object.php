@@ -31,8 +31,7 @@ class Object
 	 */
 	final public function invokeMethod($method, array $args = array())
 	{
-		if (is_callable(array($this, $method)))
-		{
+		if (is_callable(array($this, $method))) {
 			call_user_func_array(array($this, $method), $args);
 			return;
 		}

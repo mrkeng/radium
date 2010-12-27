@@ -1,5 +1,12 @@
 <?php
-$radium_locale['ja_JP'] = array(
+/**
+ * radium: the most RAD php framework
+ *
+ * @copyright Copyright 2010, Playwell Inc.
+ * @license   http://opensource.org/licenses/bsd-license.php The BSD License
+ */
+
+$radiumLocaleResources['ja_JP'] = array(
 	'Error' => 'エラー',
 	'{1} is not found' => '{1} が見つかりません',
 	'Controller "{1}" is not found.' => 'コントローラ {1} が見つかりません',
@@ -11,5 +18,11 @@ $radium_locale['ja_JP'] = array(
 	'Database resource is not found' => 'データベースリソースが見つかりません',
 	'Exception was thrown. ({1}): {2} at {3} line {4} ({5} line {6})' => '例外が発生しました ({1}): {2} at {3} line {4} ({5} line {6})',
 	'{1} is an illegal property.' => '不正なプロパティです({1})',
-	'Sorry, Database is down...' => '申し訳ありません. データベースがダウンしています.'
+	'Sorry, Database is down...' => '申し訳ありません. データベースがダウンしています.',
+	
+	'Welcome to radium PHP Framework!' => 'radium PHP フレームワークへようこそ！',
+	'Default Language of Web Browser' => 'ウェブブラウザの標準言語',
+	'Back' => '戻る',
+	'Hello World' => 'こんにちは、世界',
+	'Hello World!' => 'こんにちは、世界！'
 );

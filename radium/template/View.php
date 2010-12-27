@@ -8,10 +8,9 @@
 
 namespace radium\template;
 
-use \Exception;
-use \ErrorException;
 use \radium\action\Controller;
 use \radium\core\Object;
+use \radium\errors\NotFoundError;
 use \radium\template\helper\Html;
 use \radium\template\helper\Form;
 use \radium\utils\StringUtil;
@@ -54,8 +53,7 @@ class View extends Object
 		$layout = $options['layout'];
 		$template = $options['template'];
 		
-		if (isset($options['json']))
-		{
+		if (isset($options['json'])) {
 			$options['type'] = 'json';
 			$type = 'json';
 		}
@@ -88,8 +86,7 @@ class View extends Object
 	 */
 	public function render()
 	{
-		if (isset($this->options['json']))
-		{
+		if (isset($this->options['json'])) {
 			return json_encode($this->options['json']);
 		}
 		
@@ -102,8 +99,7 @@ class View extends Object
 	 */
 	public function contentType()
 	{
-		if (isset(static::$mimeTypes[$this->options['type']]))
-		{
+		if (isset(static::$mimeTypes[$this->options['type']])) {
 			return static::$mimeTypes[$this->options['type']];
 		}
 		return 'text/plain';
@@ -117,9 +113,8 @@ class View extends Object
 	private function _render($template)
 	{
 		// テンプレートが見つからない！
-		if (!file_exists($template))
-		{
-			throw new ErrorException(StringUtil::getLocalizedString('Template "{1}" is not found.', array($template)), TEMPLATE_NOT_FOUND);
+		if (!file_exists($template)) {
+			throw new NotFoundError(StringUtil::getLocalizedString('Template "{1}" is not found.', array($template)), TEMPLATE_NOT_FOUND);
 		}
 		
 		$html = $this->html;
@@ -128,12 +123,9 @@ class View extends Object
 		$exception = null;
 		extract($this->data, EXTR_OVERWRITE);
 		ob_start();
-		try
-		{
+		try {
 			require $template;
-		}
-		catch (Exception $e)
-		{
+		} catch (Exception $e) {
 			ob_clean();
 			throw $e;
 		}
@@ -166,8 +158,7 @@ class View extends Object
 	 */
 	private function params($name, $value = null)
 	{
-		if ($value !== null)
-		{
+		if ($value !== null) {
 			$this->params[$name] = $value;
 		}
 		
@@ -181,8 +172,7 @@ class View extends Object
 	 */
 	private function title($title = null)
 	{
-		if (!is_null($title))
-		{
+		if (!is_null($title)) {
 			$this->_title = $title;
 		}
 		return $this->_title;
@@ -195,16 +185,13 @@ class View extends Object
 	 */
 	private function styles($style = null)
 	{
-		if (!is_array($this->_styles))
-		{
+		if (!is_array($this->_styles)) {
 			$this->_styles = array();
 		}
-		if (is_array($style))
-		{
+		if (is_array($style)) {
 			foreach ($style as $s) $this->styles($s);
 		}
-		if (is_string($style))
-		{
+		if (is_string($style)) {
 			$this->_styles[] = $style;
 		}
 		return implode("\n", $this->_styles);
@@ -217,16 +204,13 @@ class View extends Object
 	 */
 	private function scripts($script = null)
 	{
-		if (!is_array($this->_scripts))
-		{
+		if (!is_array($this->_scripts)) {
 			$this->_scripts = array();
 		}
-		if (is_array($script))
-		{
+		if (is_array($script)) {
 			foreach ($script as $s) $this->scripts($s);
 		}
-		if (is_string($script))
-		{
+		if (is_string($script)) {
 			$this->_scripts[] = $script;
 		}
 		return implode("\n", $this->_scripts);

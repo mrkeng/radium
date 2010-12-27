@@ -56,9 +56,9 @@ class Controller extends Object
 	/**
 	 * テンプレートに送るデータをセット
 	 */
-	protected function params($name, $value = null, $force = false) {
-		if ($value !== null || $force)
-		{
+	protected function params($name, $value = null, $force = false)
+	{
+		if ($value !== null || $force) {
 			$this->_params[$name] = $value;
 		}
 		
@@ -108,8 +108,7 @@ class Controller extends Object
 	final public function redirect($url)
 	{
 		$to = $url;
-		if (!preg_match('/^(https?|mailto):\\/\\//', $url))
-		{
+		if (!preg_match('/^(https?|mailto):\\/\\//', $url)) {
 			$url = preg_replace('/^\\//', '', $url);
 			
 			$server = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'];

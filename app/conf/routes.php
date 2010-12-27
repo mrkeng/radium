@@ -15,3 +15,4 @@ Router::connect('/', array('controller' => 'home', 'action' => 'index'));
 
 Router::connect('/s/{:args}', array('controller' => 'hello_world', 'action' => 'show'));
 Router::connect('/hello', array('controller' => 'hello_world', 'action' => 'hello'));
+Router::connect('/data/{:Model:column}', array('controller' => 'data', 'action' => 'show'));

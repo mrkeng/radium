@@ -8,9 +8,9 @@
 
 namespace radium\net\http;
 
-use \ErrorException;
 use \radium\core\ClassLoader;
 use \radium\core\Object;
+use \radium\errors\NotFoundError;
 use \radium\utils\StringUtil;
 
 /**
@@ -30,18 +30,15 @@ final class Router extends Object
 		$arg = array_shift($args);
 		
 		$controller = null;
-		if (preg_match('/^[a-zA-Z]/', $arg))
-		{
+		if (preg_match('/^[a-zA-Z]/', $arg)) {
 			// プラグインをチェック
-			if (self::plugin_exists($arg))
-			{
+			if (self::plugin_exists($arg)) {
 				$plugin = $arg;
 				$arg = count($args) > 0 ? array_shift($args) : '';
 			}
 			
 			// コントローラのチェック
-			if (preg_match('/^[a-zA-Z]/', $arg))
-			{
+			if (preg_match('/^[a-zA-Z]/', $arg)) {
 				$controller = $arg;
 				
 				// コントローラクラス
@@ -50,25 +47,18 @@ final class Router extends Object
 				$result = ClassLoader::load($controllerClass, false);
 				
 				// コントローラクラスが見つかった
-				if ($result === true && class_exists($controllerClass))
-				{
+				if ($result === true && class_exists($controllerClass)) {
 					// アクションのチェック
-					if (count($args) > 0)
-					{
+					if (count($args) > 0) {
 						$arg = array_shift($args);
 						if (preg_match('/^[a-zA-Z]/', $arg)
-							&& !in_array($arg, explode(' ', 'render redirect content json')))
-						{
+							&& !in_array($arg, explode(' ', 'render redirect content json'))) {
 							$action = $arg;
-						}
-						else
-						{
+						} else {
 							$action = 'index';
 							array_unshift($args, $arg);
 						}
-					}
-					else
-					{
+					} else {
 						$action = 'index';
 						array_unshift($args, $arg);
 						
@@ -79,43 +69,33 @@ final class Router extends Object
 						);
 						return $route;
 					}
-				}
-				else
-				{
+				} else {
 					array_unshift($args, $controller);
 					$controller = null;
 				}
-			}
-			else
-			{
+			} else {
 				array_unshift($args, $arg);
 			}
-		}
-		else if ($arg != '')
-		{
+		} else if ($arg != '') {
 			array_unshift($args, $arg);
 		}
 		
 		$routes = static::$_routes;
 		
-		if (isset($routes[$url]))
-		{
+		if (isset($routes[$url])) {
 			$route = $routes[$url];
 			$route['args'] = $args;
 			return $route;
 		}
 		
-		foreach ($routes as $key => $route)
-		{
+		foreach ($routes as $key => $route) {
 			// {:Model:column}
 			preg_match_all('/\\{:([a-zA-Z0-9]+):([a-zA-Z0-9]+)\\}/', $key, $matches);
-			if ($matches && count($matches) > 0 && count($matches[0]) > 0)
-			{
+			if ($matches && count($matches) > 0 && count($matches[0]) > 0) {
 				$checkKey = $key;
 				$checkData = array();
 				$n = count($matches[0]);
-				for ($i = 0; $i < $n; $i++)
-				{
+				for ($i = 0; $i < $n; $i++) {
 					$param = $matches[0][$i];
 					$checkKey = str_replace($param, '______param_____', $checkKey);
 					
@@ -127,13 +107,10 @@ final class Router extends Object
 					$result = ClassLoader::load($modelClass, false);
 					
 					// モデルクラスが見つかった
-					if ($result === true && class_exists($modelClass))
-					{
+					if ($result === true && class_exists($modelClass)) {
 						$checkData[] = array($modelClass, $column);
-					}
-					else
-					{
-						throw new ErrorException(StringUtil::getLocalizedString('Model Class "{1}" is not found. ({2} at {2})', array($modelClass, __FILE__, __LINE__)), ACTION_NOT_FOUND);
+					} else {
+						throw new NotFoundError(StringUtil::getLocalizedString('Model Class "{1}" is not found. ({2} at {2})', array($modelClass, __FILE__, __LINE__)), ACTION_NOT_FOUND);
 					}
 				}
 				
@@ -141,25 +118,21 @@ final class Router extends Object
 				$checkKey = str_replace('/', '\\/', $checkKey);
 				$checkKey = str_replace('______param_____', '([-_+a-zA-Z0-9]+)', $checkKey);
 				
-				if (preg_match('/^' . $checkKey . '$/', $url, $matches))
-				{
+				if (preg_match('/^' . $checkKey . '$/', $url, $matches)) {
 					$data = array();
 					$exists = false;
 					array_shift($matches);
 					$n = count($matches);
-					for ($i = 0; $i < $n; $i++)
-					{
+					for ($i = 0; $i < $n; $i++) {
 						$modelClass = $checkData[$i][0];
 						$column = $checkData[$i][1];
 						
 						$value = $matches[$i];
 						
 						$extra = array();
-						if (count($data) > 0)
-						{
+						if (count($data) > 0) {
 							$target = count($data) > 0 ? $data[count($data) - 1] : null;
-							if (!$target || count($target) == 0)
-							{
+							if (!$target || count($target) == 0) {
 								$data[] = null;
 								continue;
 							}
@@ -175,23 +148,19 @@ final class Router extends Object
 						}
 						
 						$result = $modelClass::all(array('conditions' => array($column => $value) + $extra));
-						if ((!$result || count($result) == 0) && preg_match('/^\\d+(\\.\\d+)?$/', $value))
-						{
+						if ((!$result || count($result) == 0) && preg_match('/^\\d+(\\.\\d+)?$/', $value)) {
 							$result = $modelClass::all(array('conditions' => array($column => floatval($value)) + $extra));
 						}
-						if ((!$result || count($result) == 0) && preg_match('/^(true|false)$/', $value))
-						{
+						if ((!$result || count($result) == 0) && preg_match('/^(true|false)$/', $value)) {
 							$result = $modelClass::all(array('conditions' => array($column => ($value == 'true')) + $extra));
 						}
 						
 						$data[] = $result;
-						if ($result && count($result) > 0)
-						{
+						if ($result && count($result) > 0) {
 							$exists = true;
 						}
 					}
-					if ($exists)
-					{
+					if ($exists) {
 						$route['args'] = $data;
 						return $route;
 					}
@@ -199,15 +168,13 @@ final class Router extends Object
 			}
 			
 			// {:args}
-			if (strpos($key, '{:args}') !== false)
-			{
+			if (strpos($key, '{:args}') !== false) {
 				$key = str_replace('{:args}', '______args_____', $key);
 				$key = preg_quote($key);
 				$key = str_replace('/', '\\/', $key);
 				$key = str_replace('______args_____', '([-_+a-zA-Z0-9]+)', $key);
 				
-				if (preg_match('/^' . $key . '$/', $url, $matches))
-				{
+				if (preg_match('/^' . $key . '$/', $url, $matches)) {
 					array_shift($matches);
 					
 					$route['args'] = $matches;
@@ -243,8 +210,7 @@ final class Router extends Object
 		$class = StringUtil::camelcase($plugin);
 		$pluginFile = RADIUM_PLUGIN_PATH . '/' . $class . '.php';
 		
-		if (file_exists($pluginFile))
-		{
+		if (file_exists($pluginFile)) {
 			include $pluginFile;
 			return true;
 		}

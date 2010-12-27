@@ -31,8 +31,7 @@ class Html extends Helper
 		
 		$tag = '<a href="{:url}" {:options}>{:title}</a>';
 		
-		if (isset($options['type']) && $options['type'] == 'icon')
-		{
+		if (isset($options['type']) && $options['type'] == 'icon') {
 			if (is_null($url)) $url = 'favicon.ico';
 			$options['type'] = 'image/x-icon';
 			$tag = '<link href="{:url}" title="{:title}" rel="icon" {:options}/>' . "\n";
@@ -48,13 +47,14 @@ class Html extends Helper
 		return $this->_replace($tag, $replace, 'type');
 	}
 	
+	/**
+	 *
+	 */
 	public function style($path, array $options = array())
 	{
-		if (is_array($path))
-		{
+		if (is_array($path)) {
 			$results = array();
-			foreach ($path as $p)
-			{
+			foreach ($path as $p) {
 				$results[] = call_user_func_array(array($this, __FUNCTION__), array($p, $options));
 			}
 			return implode("\n", $results);
@@ -75,11 +75,9 @@ class Html extends Helper
 	
 	public function script($path, array $options = array())
 	{
-		if (is_array($path))
-		{
+		if (is_array($path)) {
 			$results = array();
-			foreach ($path as $p)
-			{
+			foreach ($path as $p) {
 				$results[] = call_user_func_array(array($this, __FUNCTION__), array($p, $options));
 			}
 			return implode("\n", $results);

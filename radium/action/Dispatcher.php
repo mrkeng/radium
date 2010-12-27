@@ -8,9 +8,9 @@
 
 namespace radium\action;
 
-use \ErrorException;
 use \radium\core\ClassLoader;
 use \radium\core\Object;
+use \radium\errors\NotFoundError;
 use \radium\net\http\Request;
 use \radium\net\http\Router;
 use \radium\utils\StringUtil;
@@ -78,19 +78,14 @@ final class Dispatcher extends Object
 	public function dispatch($controller = null, $action = null, $args = null)
 	{
 		$request = $this->request;
-		if (is_null($controller))
-		{
+		if (is_null($controller)) {
 			$controller = $request->params['controller'];
 			$action = $request->params['action'];
 			$args = $request->params['args'];
-		}
-		else if (is_null($action))
-		{
+		} elseif (is_null($action)) {
 			$action = $request->params['action'];
 			$args = $request->params['args'];
-		}
-		else if (is_null($args))
-		{
+		} elseif (is_null($args)) {
 			$args = $request->params['args'];
 		}
 		
@@ -100,9 +95,8 @@ final class Dispatcher extends Object
 		$result = ClassLoader::load($controllerClass, false);
 		
 		// コントローラクラスが見つからない！
-		if ($result === false || !class_exists($controllerClass))
-		{
-			throw new ErrorException(StringUtil::getLocalizedString('Controller "{1}" is not found.', array($controllerClass)), CONTROLLER_NOT_FOUND);
+		if ($result === false || !class_exists($controllerClass)) {
+			throw new NotFoundError(StringUtil::getLocalizedString('Controller "{1}" is not found.', array($controllerClass)), CONTROLLER_NOT_FOUND);
 		}
 		
 		// コントローラの処理
@@ -111,13 +105,10 @@ final class Dispatcher extends Object
 		$callAction = $action;
 		
 		// アクションがない場合は _global をコール
-		if (!is_callable(array($controllerObj, $action)) && is_callable(array($controllerObj, '_global')))
-		{
+		if (!is_callable(array($controllerObj, $action)) && is_callable(array($controllerObj, '_global'))) {
 			$callAction = '_global';
-		}
-		else if (!is_callable(array($controllerObj, $action)))
-		{
-			throw new ErrorException(StringUtil::getLocalizedString('Action "{1}" is not found. (Controller: {2})', array($action, $controllerClass)), ACTION_NOT_FOUND);
+		} elseif (!is_callable(array($controllerObj, $action))) {
+			throw new NotFoundError(StringUtil::getLocalizedString('Action "{1}" is not found. (Controller: {2})', array($action, $controllerClass)), ACTION_NOT_FOUND);
 		}
 		
 		$controllerObj->_render['template'] = $action;
@@ -126,13 +117,10 @@ final class Dispatcher extends Object
 		
 		$contentType = '';
 		$output = '';
-		if (is_string($data) || is_numeric($data) || is_bool($data))
-		{
+		if (is_string($data) || is_numeric($data) || is_bool($data)) {
 			$output = $data;
 			$contentType = 'text/plain';
-		}
-		else
-		{
+		} else {
 			$controllerObj->invokeMethod('_finalize', $data ? array($data) : array());
 			$output = $controllerObj->renderedContent();
 			$contentType = $controllerObj->view->contentType();

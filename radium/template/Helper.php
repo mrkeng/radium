@@ -53,28 +53,20 @@ class Helper extends Object
 	 */
 	public function path($path, $prefix = null, $suffix = null)
 	{
-		if (is_null($path))
-		{
+		if (is_null($path)) {
 			$controller = $this->controller;
 			$request = new Request();
 			return APP_BASE_PATH . substr($request->uri, 1);
-		}
-		else if (preg_match('/^\#/', $path))
-		{
+		} elseif (preg_match('/^\#/', $path)) {
 			return $path;
-		}
-		else if (!preg_match('/^https?:\\/\\//', $path))
-		{
-			if (is_null($prefix))
-			{
+		} elseif (!preg_match('/^https?:\\/\\//', $path)) {
+			
+			if (is_null($prefix)) {
+				if (substr($path, 0, 1) == '/') $path = substr($path, 1);
 				$path = APP_BASE_PATH . $path;
-			}
-			else if (preg_match('/^\\//', $path))
-			{
+			} elseif (preg_match('/^\\//', $path)) {
 				$path = $path;
-			}
-			else
-			{
+			} else {
 				$path = $prefix . '/' . $path;
 			}
 		}
@@ -94,13 +86,10 @@ class Helper extends Object
 		$excludeAttr .= ' escape';
 		$excludes = explode(' ', $excludeAttr);
 		
-		foreach ($replace as $key => $value)
-		{
-			if (is_array($value))
-			{
+		foreach ($replace as $key => $value) {
+			if (is_array($value)) {
 				$list = array();
-				foreach ($value as $k => $v)
-				{
+				foreach ($value as $k => $v) {
 					if (in_array($k, $excludes)) continue;
 					$list[] = $k . '="' . $this->escape($v) . '"';
 				}

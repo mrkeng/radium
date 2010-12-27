@@ -37,8 +37,9 @@ class Resource extends ArrayAccessable
 	 */
 	public static function get($name)
 	{
-		if (isset(static::$resources[$name]))
+		if (isset(static::$resources[$name])) {
 			return new Resource(static::$resources[$name]);
+		}
 		
 		throw new ErrorException(StringUtil::getLocalizedString('Database resource is not found'), CONNECT_DATABASE_ERROR);
 	}

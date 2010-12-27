@@ -71,7 +71,8 @@ class ArrayAccessable extends Object implements ArrayAccess
 	 * @param string $offset An offset to check for.
 	 * @return boolean `true` if offset exists, `false` otherwise.
 	 */
-	public function offsetExists($offset) {
+	public function offsetExists($offset)
+	{
 		return isset($this->_data[$offset]);
 	}
 
@@ -81,7 +82,8 @@ class ArrayAccessable extends Object implements ArrayAccess
 	 * @param string $offset The offset to retrieve.
 	 * @return mixed Value at offset.
 	 */
-	public function offsetGet($offset) {
+	public function offsetGet($offset)
+	{
 		return isset($this->_data[$offset]) ? $this->_data[$offset] : null;
 	}
 
@@ -92,7 +94,8 @@ class ArrayAccessable extends Object implements ArrayAccess
 	 * @param mixed $value The value to set.
 	 * @return mixed The value which was set.
 	 */
-	public function offsetSet($offset, $value) {
+	public function offsetSet($offset, $value)
+	{
 		if (is_null($offset)) {
 			return $this->_data[] = $value;
 		}
@@ -105,7 +108,8 @@ class ArrayAccessable extends Object implements ArrayAccess
 	 * @param string $offset The offset to unset.
 	 * @return void
 	 */
-	public function offsetUnset($offset) {
+	public function offsetUnset($offset)
+	{
 		unset($this->_data[$offset]);
 	}
 }

@@ -5,6 +5,12 @@
  * @copyright Copyright 2010, Playwell Inc.
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
+
+$uri = $this->request->uri;
+$lang = \radium\storage\Session::read('lang');
+ll('');
+list($htmlLang, $country) = explode('_', DEFAULT_LANG);
+
 ?><!DOCTYPE html>
 <html>
 <head>
@@ -43,7 +49,11 @@
 </div>
 
 <footer>
-	<p id="copyright">&copy; 2010 Playwell Inc.</p>
+	<p class="lang-selector"><?php echo ll('Languages'); ?>: 
+		<?php if ($lang == 'en'): ?>English<?php else: ?><?php echo $this->html->link('English', $uri . '?lang=en'); ?><?php endif; ?>,
+		<?php if ($lang == 'ja'): ?>日本語 (Japanese)<?php else: ?><?php echo $this->html->link('日本語 (Japanese)', $uri . '?lang=ja'); ?><?php endif; ?>,
+		<?php if (!$lang): ?><?php echo ll('Default Language of Web Browser'); ?><?php else: ?><?php echo $this->html->link(ll('Default Language of Web Browser'), $uri . '?lang=default'); ?><?php endif; ?></p>
+	<p id="copyright">&copy; 2010 <a href="http://www.playwell.co.jp/">Playwell Inc.</a></p>
 </footer>
 </body>
 </html>

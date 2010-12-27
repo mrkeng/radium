@@ -33,8 +33,7 @@ class Model extends ArrayAccessable
 		$class = get_called_class();
 		$instance = new $class();
 		
-		foreach ($data as $key => $value)
-		{
+		foreach ($data as $key => $value) {
 			$instance->_data[$key] = $value;
 		}
 		
@@ -53,8 +52,7 @@ class Model extends ArrayAccessable
 		$defaults = array('conditions' => array());
 		$options += $defaults;
 		
-		switch ($type)
-		{
+		switch ($type) {
 			case 'first':
 				return static::findOne($options['conditions'], $raw);
 			case 'all':
@@ -143,8 +141,7 @@ class Model extends ArrayAccessable
 	{
 		parent::__construct();
 		
-		if (is_null($this->_class))
-		{
+		if (is_null($this->_class)) {
 			$class = get_class($this);
 			$this->_class = strtolower(substr($class, strrpos($class, '\\') + 1));
 		}

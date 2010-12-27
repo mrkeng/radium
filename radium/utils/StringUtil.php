@@ -8,6 +8,8 @@
 
 namespace radium\utils;
 
+use \radium\storage\Session;
+
 /**
  * エラー処理のユーティリティクラス
  */
@@ -30,14 +32,10 @@ final class StringUtil
 	{
 		$result = '';
 		$words = explode('_', $str);
-		foreach ($words as $word)
-		{
-			if (strlen($word) > 1)
-			{
+		foreach ($words as $word) {
+			if (strlen($word) > 1) {
 				$result .= strtoupper($word{0}) . substr($word, 1);
-			}
-			else
-			{
+			} else {
 				$result .= strtoupper($word);
 			}
 		}
@@ -55,7 +53,9 @@ final class StringUtil
 		$result = strtolower($result);
 		
 		if (!preg_match('/^[A-Z][A-Z]/', $str) && !preg_match('/^[a-z0-9]/', $str))
+		{
 			$result = substr($result, 1);
+		}
 		
 		return $result;
 	}
@@ -66,20 +66,12 @@ final class StringUtil
 	 * @param array $params 置換文字のリスト
 	 * @return ローカライズされた文字列
 	 */
+	private static $radiumLocaleResources;
 	final public static function getLocalizedString($key, array $params = array(), $lang = null)
 	{
-		if (!isset($GLOBALS['radium_locale'])) {
+		if (!static::$radiumLocaleResources) {
 			
-			if (!defined('DEFAULT_LANG')) {
-				$headers = getallheaders();
-				if (isset($headers['Accept-Language'])) {
-					$lang = $headers['Accept-Language'];
-					$lang = preg_replace('/-([a-z]+)$/e', '"_" . strtoupper("\\1")', $lang);
-					define('DEFAULT_LANG', $lang);
-				}
-			}
-			
-			$radium_locale = array();
+			$radiumLocaleResources = array();
 			
 			$i18nDir = RADIUM_APP_PATH . '/i18n';
 			if (is_dir($i18nDir)) {
@@ -93,18 +85,67 @@ final class StringUtil
 				}
 			}
 			
-			$GLOBALS['radium_locale'] = $radium_locale;
+			static::$radiumLocaleResources = $radiumLocaleResources;
+			
+			if (!defined('DEFAULT_LANG')) {
+			
+				$langs = array();
+				$headers = getallheaders();
+				if (isset($headers['Accept-Language'])) {
+					$langs = explode(',', $headers['Accept-Language']);
+				}
+				
+				if (isset($_GET['lang'])) {
+					$langParam = $_GET['lang'];
+					if ($langParam == '' || $langParam == 'default') {
+						Session::delete('lang');
+					}
+					else {
+						Session::write('lang', $langParam);
+					}
+				}
+				
+				$sessionLang = Session::read('lang');
+				if ($sessionLang) {
+					$langs = explode(',', $sessionLang);
+				}
+				
+				$langResources = array_keys($radiumLocaleResources);
+				foreach ($langs as $l) {
+					if (preg_match('/^([a-z]+)[-_]([a-zA-Z0-9]+)$/', $l, $matches)) {
+						$l = $matches[1] . '_' . strtoupper($matches[2]);
+						foreach ($langResources as $langResource) {
+							if ($langResource == $l) {
+								define('DEFAULT_LANG', $langResource);
+								break;
+							}
+						}
+					}
+					else if (preg_match('/^[a-z]+$/', $l)) {
+						foreach ($langResources as $langResource) {
+							list($locale, $country) = explode('_', $langResource);
+							if ($locale == $l) {
+								define('DEFAULT_LANG', $langResource);
+								break;
+							}
+						}
+					}
+					if (defined('DEFAULT_LANG')) break;
+				}
+			}
+			if (!defined('DEFAULT_LANG')) define('DEFAULT_LANG', 'en_US');
 		}
 		
-		if (is_null($lang)) $lang = DEFAULT_LANG;
+		$lang = DEFAULT_LANG;
+		
 		$result = $key;
 		
-		$radium_locale = $GLOBALS['radium_locale'];
-		if (isset($radium_locale[$lang][$key])) {
-			$result = $radium_locale[$lang][$key];
+		$radiumLocaleResources = static::$radiumLocaleResources;
+		if (isset($radiumLocaleResources[$lang][$key])) {
+			$result = $radiumLocaleResources[$lang][$key];
 		}
-		else if (isset($radium_locale['en_US'][$key])) {
-			$result = $radium_locale['en_US'][$key];
+		else if (isset($radiumLocaleResources['en_US'][$key])) {
+			$result = $radiumLocaleResources['en_US'][$key];
 		}
 		
 		if (is_array($params)) {

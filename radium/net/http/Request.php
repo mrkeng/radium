@@ -32,10 +32,12 @@ final class Request extends Object
 		
 		// uri
 		$uri = $_SERVER['REQUEST_URI'];
+		if (strpos($uri, '?') !== false) {
+			$uri = substr($uri, 0, strpos($uri, '?'));
+		}
 		
 		$basePath = defined('APP_BASE_PATH') ? APP_BASE_PATH : '/';
-		if (strpos($uri, $basePath) == '0')
-		{
+		if (strpos($uri, $basePath) == '0') {
 			$uri = substr($uri, strlen($basePath));
 		}
 		
@@ -60,8 +62,7 @@ final class Request extends Object
 	 */
 	public function __get($name)
 	{
-		switch ($name)
-		{
+		switch ($name) {
 			case 'uri':
 				return $this->_config['uri'];
 			case 'data':

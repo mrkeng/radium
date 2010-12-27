@@ -33,14 +33,11 @@ class MongoDB extends Object
 		);
 		
 		$results = array();
-		foreach ($conditions as $key => $value)
-		{
-			if (is_array($value))
-			{
+		foreach ($conditions as $key => $value) {
+			if (is_array($value)) {
 				$values = $value;
 				$value = array();
-				foreach ($values as $k => $v)
-				{
+				foreach ($values as $k => $v) {
 					$value[isset($operators[$k]) ? $operators[$k] : $k] = $v;
 				}
 			}
@@ -90,10 +87,8 @@ class MongoDB extends Object
 		$modelClass = $this->modelClass;
 		
 		$list = array();
-		while ($data = $cursor->getNext())
-		{
-			if ($raw)
-			{
+		while ($data = $cursor->getNext()) {
+			if ($raw) {
 				$list[] = $data;
 				continue;
 			}
@@ -101,8 +96,7 @@ class MongoDB extends Object
 			$model = new $modelClass();
 			
 			$keys = array_keys($data);
-			foreach ($keys as $key)
-			{
+			foreach ($keys as $key) {
 				$model->$key = $data[$key];
 			}
 			$list[] = $model;

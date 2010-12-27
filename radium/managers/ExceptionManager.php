@@ -35,8 +35,8 @@ final class ExceptionManager
 		
 		$errorController = 'app\\controllers\\ErrorController';
 		$result = ClassLoader::load($errorController, false);
-		if ($result && class_exists($errorController))
-		{
+		
+		if ($result && class_exists($errorController)) {
 			$controllerObj = new $errorController(new \radium\net\http\Request());
 			$action = 'index';
 			
@@ -46,13 +46,10 @@ final class ExceptionManager
 			
 			$contentType = 'text/html';
 			$output = '';
-			if (is_string($data))
-			{
+			if (is_string($data)) {
 				$output = $data;
 				$contentType = 'text/plain';
-			}
-			else
-			{
+			} else {
 				$controllerObj->invokeMethod('_finalize', $data ? array($data) : array());
 				$output = $controllerObj->renderedContent();
 				$contentType = $controllerObj->view->contentType();
@@ -65,8 +62,7 @@ final class ExceptionManager
 		
 		$backtrace = $exception->getTrace();
 		$line = array_shift($backtrace);
-		while ($line && !isset($line['file']))
-		{
+		while ($line && !isset($line['file'])) {
 			$line = array_shift($backtrace);
 		}
 		

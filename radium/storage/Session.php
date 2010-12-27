@@ -25,8 +25,7 @@ final class Session extends Object
 	 */
 	public static function config(array $options = array())
 	{
-		if (!static::$options)
-		{
+		if (!static::$options) {
 			$defaults = array(
 				'session.name' => basename(RADIUM_APP_PATH),
 				'session.cookie_lifetime' => '1209600' // 2w
@@ -34,9 +33,7 @@ final class Session extends Object
 			
 			$options += $defaults;
 			static::$options = $options;
-		}
-		else
-		{
+		} else {
 			static::$options = $options + static::$options;
 		}
 		return static::$options;
@@ -48,13 +45,10 @@ final class Session extends Object
 	public static function init($force = false)
 	{
 		if (!$force && static::$_isStarted) return;
-		if (!session_id())
-		{
+		if (!session_id()) {
 			$options = static::config();
-			foreach ($options as $key => $value)
-			{
-				if (strpos($key, 'session.') == 0)
-				{
+			foreach ($options as $key => $value) {
+				if (strpos($key, 'session.') == 0) {
 					ini_set($key, $value);
 				}
 			}

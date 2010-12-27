@@ -9,6 +9,7 @@
 namespace app\controllers;
 
 use \Exception;
+use \radium\errors\NotFoundError;
 use \radium\utils\StringUtil;
 
 class ErrorController extends AbstractController
@@ -16,9 +17,13 @@ class ErrorController extends AbstractController
 	public function index(Exception $exception)
 	{
 		// データベースダウン
-		if (strpos($exception->getMessage(), 'mongodb') !== false)
-		{
+		if (strpos($exception->getMessage(), 'mongodb') !== false) {
 			return StringUtil::getLocalizedString('Sorry, Database is down...');
+		}
+		
+		if ($exception instanceof NotFoundError) {
+			header("HTTP/1.0 404 Not Found");
+			header("Status: 404 Not Found");
 		}
 		
 		return compact('exception');

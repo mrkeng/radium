@@ -36,6 +36,7 @@ define('RADIUM_APP_PATH', RADIUM_PATH . '/app');
 define('RADIUM_PLUGIN_PATH', RADIUM_APP_PATH . '/plugins');
 define('RADIUM_LIBRARY_PATH', RADIUM_PATH . '/radium');
 
+define('NOT_FOUND', 404);
 define('CLASSFILE_NOT_FOUND', 1);
 define('CLASS_NOT_FOUND', 2);
 define('CONTROLLER_NOT_FOUND', 3);
