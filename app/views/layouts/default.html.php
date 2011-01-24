@@ -17,6 +17,7 @@ list($htmlLang, $country) = explode('_', DEFAULT_LANG);
 <?php echo $this->html->charset();?>
 
 <title><?php echo $this->title(); ?></title>
+<?php echo $this->ogp(); ?>
 <?php echo $this->html->script(array('libs/jquery-1.4.4.min')); ?>
 
 <!--[if IE]>

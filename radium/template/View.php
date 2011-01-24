@@ -34,6 +34,7 @@ class View extends Object
 	private $form;
 	
 	private $_title;
+	private $_ogp;
 	private $_styles;
 	private $_scripts;
 	
@@ -181,6 +182,28 @@ class View extends Object
 			$this->_title = $title;
 		}
 		return $this->_title;
+	}
+	
+	/**
+	 * Open Graph Protocol
+	 * @param array OGP データ
+	 */
+	private function ogp(array $ogp = null)
+	{
+		if (!is_null($ogp)) {
+			$this->_ogp = $ogp;
+		}
+		$result = '';
+		if (is_array($this->_ogp)) {
+			foreach ($this->_ogp as $key => $value) {
+				if (is_null($value) || $value == '') continue;
+				$result .= '<meta property="og:'
+					. $this->html->escape($key)
+					. '" content="'
+					. $this->html->escape($value) . '" />' . "\n";
+			}
+		}
+		return $result;
 	}
 	
 	/**
