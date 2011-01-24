@@ -36,10 +36,10 @@ final class ClassLoader extends Object
 		
 		$prefixes = array(
 			RADIUM_PATH,
-			RADIUM_APP_PATH . '/libraries'
+			RADIUM_APP_PATH . DIRECTORY_SEPARATOR . 'libraries'
 		);
 		foreach ($prefixes as $prefix) {
-			$path = $prefix . '/' . $classFile;
+			$path = $prefix . DIRECTORY_SEPARATOR . $classFile;
 			if (file_exists($path) && include_once($path)) {
 				return true;
 			}

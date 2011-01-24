@@ -33,7 +33,7 @@ class Form extends Helper
 		unset($options['action']);
 		
 		$replace = array(
-			'action' => $this->path($action),
+			'action' => $this->escape($this->path($action)),
 			'options' => $options
 		);
 		

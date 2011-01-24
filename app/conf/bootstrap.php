@@ -47,13 +47,13 @@ define('INVALID_METHOD', 7);
 define('INVALID_PROPERTY', 8);
 
 // コアライブラリを読み込み
-require RADIUM_APP_PATH . '/conf/libraries.php';
+require __DIR__ . '/libraries.php';
 
 // データベース設定を読み込み
-require RADIUM_APP_PATH . '/conf/database.php';
+require __DIR__ . '/database.php';
 
 // ルーティング設定を読み込み
-require RADIUM_APP_PATH . '/conf/routes.php';
+require __DIR__ . '/routes.php';
 
 // グローバル関数を読み込み
 require __DIR__ . '/global_functions.php';

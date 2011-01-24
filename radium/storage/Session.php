@@ -28,7 +28,8 @@ final class Session extends Object
 		if (!static::$options) {
 			$defaults = array(
 				'session.name' => basename(RADIUM_APP_PATH),
-				'session.cookie_lifetime' => '1209600' // 2w
+				'session.cookie_lifetime' => 1209600, // 2w
+				'session.gc_maxlifetime' => 1209600,
 			);
 			
 			$options += $defaults;

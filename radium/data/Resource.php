@@ -22,11 +22,19 @@ class Resource extends ArrayAccessable
 	/**
 	 * データベースリソースを追加
 	 * @param string $name データベースリソース名
-	 * @param array $data データベース設定
+	 * @param array $data マスターデータベース設定
+	 * @param array $data スレイブデータベース設定（オプション） 
 	 */
-	public static function add($name, array $data)
+	public static function add()
 	{
-		static::$resources[$name] = $data;
+		$num = func_num_args();
+		if ($num < 2) {
+			throw new ErrorException(StringUtil::getLocalizedString('Invalid Arguments'));
+		}
+		$args = func_get_args();
+		$name = array_shift($args);
+		
+		static::$resources[$name] = $args;
 	}
 	
 	/**
@@ -44,15 +52,18 @@ class Resource extends ArrayAccessable
 		throw new ErrorException(StringUtil::getLocalizedString('Database resource is not found'), CONNECT_DATABASE_ERROR);
 	}
 	
+	public $data;
+	
 	/**
 	 * コンストラクタ
 	 * @param array $data データベース設定
 	 */
-	public function __construct(array $data = array())
+	public function __construct(array $data)
 	{
-		$data += $defaults = array(
+		$data[0] += array(
 			'adapter' => 'radium.data.adapter.MongoDB'
 		);
-		$this->_data = $data;
+		
+		$this->data = $data;
 	}
 }

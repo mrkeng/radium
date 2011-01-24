@@ -6,10 +6,12 @@
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-$this->title('エラー');
+use \radium\utils\StringUtil;
+
+$this->title(StringUtil::getLocalizedString('Error'));
 
 ?>
 <section>
-	<h2>エラーが発生しました</h2>
+	<h2><?php echo $this->title(); ?></h2>
 	<p><?php echo $exception->getMessage(); ?></p>
 </section>

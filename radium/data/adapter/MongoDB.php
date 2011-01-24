@@ -8,15 +8,24 @@
 
 namespace radium\data\adapter;
 
+use \ErrorException;
+use \Exception;
+use \InvalidArgumentException;
 use \Mongo;
+use \MongoConnnectionException;
+use \MongoCursorException;
 use \radium\core\Object;
 use \radium\data\Resource;
+use \radium\errors\DatabaseError;
 
 /**
  * MongoDB のアダプタ
  */
 class MongoDB extends Object
 {
+	private static $collections = array();
+	public static $count = 0;
+	
 	/**
 	 * 条件式の変換
 	 * @param array $conditions
@@ -47,8 +56,8 @@ class MongoDB extends Object
 	}
 	
 	protected $model;
-	protected $modelClass;
-	protected $collection;
+	protected $collectionName;
+	protected $resource;
 	
 	/**
 	 * コンストラクタ
@@ -57,16 +66,56 @@ class MongoDB extends Object
 	{
 		parent::__construct();
 		
+		$this->model = $model;
+		$this->collectionName = $model->className();
+		$this->resource = $resource;
+	}
+	
+	/**
+	 * コレクションを取得
+	 */
+	public function getCollection($master = false)
+	{
+		static::$count++;
+		if ($master) {
+			$resource = $this->resource[0];
+		} else {
+			if (count($this->resource) == 1) {
+				$resource = $this->resource[0];
+			} else {
+				$resource = $this->resource[rand(1, count($this->resource) - 1)];
+			}
+		}
+		
 		$host = $resource['host'];
 		$databaseName = $resource['database'];
 		
-		$mongo = new Mongo('mongodb://' . $host, array('persist' => ''));
-		$database = $mongo->selectDB($databaseName);
+		$key = implode('_', array($host, $databaseName, $this->collectionName));
+		if (isset(static::$collections[$key])) return static::$collections[$key];
 		
-		$this->model = $model;
-		$this->modelClass= get_class($model);
+		//echo ' ' . $key . '<br /> ';
 		
-		$this->collection = $database->selectCollection($model->className());
+		$collection = null;
+		try {
+			
+			$mongo = new Mongo('mongodb://' . $host);
+			//$mongo = new Mongo('mongodb://' . $host);
+			$database = $mongo->selectDB($databaseName);
+			$collection = $database->selectCollection($this->collectionName);
+			
+			static::$collections[$key] = $collection;
+			
+		} catch (MongoConnnectionException $e) {
+			throw new DatabaseError($e->getMessage());
+		} catch (InvalidArgumentException $e) {
+			throw new DatabaseError($e->getMessage());
+		} catch (ErrorException $e) {
+			throw new DatabaseError($e->getMessage());
+		} catch (Exception $e) {
+			throw new DatabaseError($e->getMessage());
+		}
+		
+		return $collection;
 	}
 	
 	/**
@@ -77,14 +126,14 @@ class MongoDB extends Object
 	 */
 	public function find(array $options = array(), $raw = false)
 	{
-		$collection = $this->collection;
+		$collection = $this->getCollection();
 		$cursor = $collection->find(static::_conditions($options['conditions']));
 		
+		if (isset($options['order'])) $cursor->sort($options['order']);
 		if (isset($options['offset'])) $cursor->skip($options['offset']);
 		if (isset($options['limit'])) $cursor->limit($options['limit']);
-		if (isset($options['order'])) $cursor->sort($options['order']);
 		
-		$modelClass = $this->modelClass;
+		$modelClass = get_class($this->model);
 		
 		$list = array();
 		while ($data = $cursor->getNext()) {
@@ -95,9 +144,8 @@ class MongoDB extends Object
 			
 			$model = new $modelClass();
 			
-			$keys = array_keys($data);
-			foreach ($keys as $key) {
-				$model->$key = $data[$key];
+			foreach ($data as $key => $value) {
+				$model->$key = $value;
 			}
 			$list[] = $model;
 		}
@@ -112,9 +160,30 @@ class MongoDB extends Object
 	 */
 	public function count(array $conditions = array())
 	{
-		$collection = $this->collection;
+		$collection = $this->getCollection();
 		$cursor = $collection->find(static::_conditions($conditions));
 		return $cursor->count();
+	}
+	
+	/**
+	 * 更新
+	 * @param array $conditions 条件
+	 * @param array $values 更新後の値
+	 */
+	public function update(array $conditions, array $values = array())
+	{
+		$collection = $this->getCollection(true);
+		
+		$options = array(
+			'upsert' => false,
+			'multiple' => true,
+		);
+		
+		try {
+			return $collection->update(static::_conditions($conditions), $values, array('safe' => true) + $options);
+		} catch (MongoCursorException $e) {
+			return false;
+		}
 	}
 	
 	/**
@@ -123,48 +192,54 @@ class MongoDB extends Object
 	 */
 	public function save()
 	{
-		$model = $this->model;
-		$collection = $this->collection;
+		$collection = $this->getCollection(true);
 		
+		$model = $this->model;
 		$data = $model->data();
 		
 		// 更新
-		if (isset($data['_id']) && $data['_id'])
-		{
+		if (isset($data['_id']) && $data['_id']) {
 			return $collection->save($data);
-		}
-		
+
 		// 新規作成
-		else
-		{
+		} else {
 			return $collection->insert($data);
 		}
 	}
 	
 	/**
-	 * 削除
+	 * 1データ削除
 	 */
 	public function delete()
 	{
 		$model = $this->model;
 		$data = $model->data();
-		if (isset($data['_id']))
-		{
-			$collection = $this->collection;
-			return $collection->remove(array('_id' => $data['_id']), array("justOne" => true));
-		}
-		else
-		{
+		if (isset($data['_id'])) {
+			$collection = $this->getCollection(true);
+			try {
+				return $collection->remove(array('_id' => $data['_id']), array("justOne" => true, 'safe' => true));
+				return $result['n'];
+			} catch (MongoCursorException $e) {
+				return false;
+			}
+		} else {
 			return false;
 		}
 	}
 	
 	/**
-	 * 
+	 * 削除
+	 * @param array $conditions 条件
 	 */
-	public function deleteAll()
+	public function deleteAll(array $conditions)
 	{
-		$collection = $this->collection;
-		return $collection->remove(array());
+		$collection = $this->getCollection(true);
+		
+		try {
+			$result =  $collection->remove(static::_conditions($conditions), array('safe' => true));
+			return $result['n'];
+		} catch (MongoCursorException $e) {
+			return false;
+		}
 	}
 }

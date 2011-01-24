@@ -126,8 +126,7 @@ class Controller extends Object
 	 */
 	final public function call($controller, $action, array $args = array())
 	{
-		echo $this->dispatcher->dispatch($controller, $action, $args);
-		$this->_stop();
+		return $this->dispatcher->dispatch($controller, $action, $args);
 	}
 	
 	/**

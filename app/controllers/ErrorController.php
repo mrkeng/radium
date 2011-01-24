@@ -8,13 +8,12 @@
 
 namespace app\controllers;
 
-use \Exception;
 use \radium\errors\NotFoundError;
 use \radium\utils\StringUtil;
 
-class ErrorController extends AbstractController
+class ErrorController extends \radium\action\Controller
 {
-	public function index(Exception $exception)
+	public function index($exception)
 	{
 		// データベースダウン
 		if (strpos($exception->getMessage(), 'mongodb') !== false) {

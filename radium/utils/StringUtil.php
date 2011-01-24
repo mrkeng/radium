@@ -67,9 +67,10 @@ final class StringUtil
 	 * @return ローカライズされた文字列
 	 */
 	private static $radiumLocaleResources;
-	final public static function getLocalizedString($key, array $params = array(), $lang = null)
+	final public static function getLocalizedString($key, array $params = array(), $escape = false)
 	{
-		if (!static::$radiumLocaleResources) {
+		$lang = null;
+		if (!static::$radiumLocaleResources || !defined('DEFAULT_LANG')) {
 			
 			$radiumLocaleResources = array();
 			
@@ -136,13 +137,11 @@ final class StringUtil
 			if (!defined('DEFAULT_LANG')) define('DEFAULT_LANG', 'en_US');
 		}
 		
-		$lang = DEFAULT_LANG;
-		
 		$result = $key;
 		
 		$radiumLocaleResources = static::$radiumLocaleResources;
-		if (isset($radiumLocaleResources[$lang][$key])) {
-			$result = $radiumLocaleResources[$lang][$key];
+		if (isset($radiumLocaleResources[DEFAULT_LANG][$key])) {
+			$result = $radiumLocaleResources[DEFAULT_LANG][$key];
 		}
 		else if (isset($radiumLocaleResources['en_US'][$key])) {
 			$result = $radiumLocaleResources['en_US'][$key];
@@ -151,7 +150,7 @@ final class StringUtil
 		if (is_array($params)) {
 			$n = count($params);
 			for ($i = 0; $i < $n; $i++) {
-				$result = str_replace('{' . ($i + 1) . '}', $params[$i], $result);
+				$result = str_replace('{' . ($i + 1) . '}', ($escape ? static::escape($params[$i]) : $params[$i]), $result);
 			}
 		}
 		

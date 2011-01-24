@@ -28,13 +28,35 @@ final class Dispatcher extends Object
 	public static function run(Request $request)
 	{
 		$dispatcher = new Dispatcher($request);
-		return $dispatcher->dispatch();
+		list($controllerObj, $data) = $dispatcher->dispatch();
+		
+		$contentType = '';
+		$output = '';
+		if (is_string($data) || is_numeric($data) || is_bool($data)) {
+			$output = $data;
+			$contentType = 'text/plain';
+		} else {
+			$controllerObj->invokeMethod('_finalize', $data ? array($data) : array());
+			$output = $controllerObj->renderedContent();
+			$contentType = $controllerObj->view->contentType();
+		}
+		
+		header('Content-Type: ' . $contentType .  '; charset=UTF-8');
+		
+		if (defined('START_TIME') && function_exists('microtime_float')) {
+			header('X-Process-Time: ' . (microtime_float() - START_TIME));
+		}
+		
+		header('X-Dbc: ' . \radium\data\adapter\MongoDB::$count);
+		
+		echo $output;
 	}
 	
 	//--------------------------------------
 	// 
 	//--------------------------------------
 	private $request;
+	private $lastControllerObj;
 	
 	/**
 	 * コンストラクタ
@@ -58,6 +80,8 @@ final class Dispatcher extends Object
 			define('DEFAULT_CONTROLLER', 'home');
 		}
 		
+		StringUtil::getLocalizedString('');
+		
 		// URI を分割します
 		$args = strlen(substr($uri, 1)) > 0 ? explode('/', substr($uri, 1)) : array();
 		
@@ -75,8 +99,13 @@ final class Dispatcher extends Object
 		$this->request = $request;
 	}
 	
+	/**
+	 *
+	 */
 	public function dispatch($controller = null, $action = null, $args = null)
 	{
+		$containsController = $controller == null;
+		
 		$request = $this->request;
 		if (is_null($controller)) {
 			$controller = $request->params['controller'];
@@ -90,7 +119,7 @@ final class Dispatcher extends Object
 		}
 		
 		// コントローラクラス
-		$controllerClass = 'app\\controllers\\' . StringUtil::camelcase($controller) . 'Controller';
+		$controllerClass = '\\app\\controllers\\' . StringUtil::camelcase($controller) . 'Controller';
 		
 		$result = ClassLoader::load($controllerClass, false);
 		
@@ -115,18 +144,8 @@ final class Dispatcher extends Object
 		$controllerObj->invokeMethod('_init');
 		$data = @call_user_func_array(array($controllerObj, $callAction), $args);
 		
-		$contentType = '';
-		$output = '';
-		if (is_string($data) || is_numeric($data) || is_bool($data)) {
-			$output = $data;
-			$contentType = 'text/plain';
-		} else {
-			$controllerObj->invokeMethod('_finalize', $data ? array($data) : array());
-			$output = $controllerObj->renderedContent();
-			$contentType = $controllerObj->view->contentType();
-		}
+		if ($containsController) return array($controllerObj, $data);
 		
-		header('Content-Type: ' . $contentType .  '; charset=UTF-8');
-		return $output;
+		return $data;
 	}
 }

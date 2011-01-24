@@ -53,10 +53,11 @@ class Helper extends Object
 	 */
 	public function path($path, $prefix = null, $suffix = null)
 	{
-		if (is_null($path)) {
+		if (is_null($path) || preg_match('/^\\?/', $path)) {
+			if (is_null($path)) $path = '';
 			$controller = $this->controller;
 			$request = new Request();
-			return APP_BASE_PATH . substr($request->uri, 1);
+			return APP_BASE_PATH . substr($request->uri, 1) . $path;
 		} elseif (preg_match('/^\#/', $path)) {
 			return $path;
 		} elseif (!preg_match('/^https?:\\/\\//', $path)) {
@@ -71,7 +72,12 @@ class Helper extends Object
 			}
 		}
 		
-		if (!is_null($suffix) && strlen($path) != (strlen($suffix) + strrpos($path, $suffix))) $path .= $suffix;
+		$filePath = $path;
+		if (strpos($filePath, '?') !== false) {
+			$filePath = substr($filePath, 0, strpos($filePath, '?'));
+		}
+		
+		if (!is_null($suffix) && strlen($filePath) != (strlen($suffix) + strrpos($filePath, $suffix))) $path .= $suffix;
 		
 		return $path;
 	}

@@ -11,9 +11,9 @@ namespace radium\errors;
 use \ErrorException;
 
 /**
- * データが見つからないエラー
+ * データベースのエラー
  */
-final class NotFoundError extends ErrorException
+final class DatabaseError extends ErrorException
 {
 	public function __construct($message = null, $code = 0)
 	{

@@ -28,6 +28,7 @@ class View extends Object
 	private $data;
 	private $params;
 	private $content;
+	private $contentType;
 	
 	private $html;
 	private $form;
@@ -89,6 +90,9 @@ class View extends Object
 		if (isset($this->options['json'])) {
 			return json_encode($this->options['json']);
 		}
+		if ($this->options['type'] == 'json') {
+			return json_encode($this->data);
+		}
 		
 		$this->content = $this->_render($this->templateFile);
 		return $this->_render($this->layoutFile);
@@ -99,7 +103,9 @@ class View extends Object
 	 */
 	public function contentType()
 	{
-		if (isset(static::$mimeTypes[$this->options['type']])) {
+		if ($this->contentType) {
+			return $this->contentType;
+		} elseif (isset(static::$mimeTypes[$this->options['type']])) {
 			return static::$mimeTypes[$this->options['type']];
 		}
 		return 'text/plain';
@@ -120,7 +126,6 @@ class View extends Object
 		$html = $this->html;
 		$form = $this->form;
 		
-		$exception = null;
 		extract($this->data, EXTR_OVERWRITE);
 		ob_start();
 		try {

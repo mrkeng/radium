@@ -8,7 +8,6 @@
 
 namespace radium\managers;
 
-use \Exception;
 use \radium\core\ClassLoader;
 use \radium\utils\StringUtil;
 
@@ -22,14 +21,23 @@ final class ExceptionManager
 	
 	public static function init()
 	{
+		//set_error_handler('\\radium\\managers\\ExceptionManager::catchError');
 		set_exception_handler('\\radium\\managers\\ExceptionManager::catchException');
+	}
+	
+	/**
+	 *
+	 */
+	public static function catchError($errno, $errstr, $errfile, $errline)
+	{
+		throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
 	}
 	
 	/**
 	 * 
 	 * @param Exception $exception
 	 */
-	public static function catchException(Exception $exception)
+	public static function catchException($exception)
 	{
 		$code = $exception->getCode();
 		

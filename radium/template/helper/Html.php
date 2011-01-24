@@ -39,7 +39,7 @@ class Html extends Helper
 		}
 		
 		$replace = array(
-			'url' => $this->path($url),
+			'url' => $this->escape($this->path($url)),
 			'options' => $options,
 			'title' => $this->escape($label, $options)
 		);
@@ -65,7 +65,7 @@ class Html extends Helper
 		$dirName = defined('CSS_DIR') ? CSS_DIR : 'css';
 		
 		$replace = array(
-			'path' => $this->path($path, APP_BASE_PATH . $dirName, '.css'),
+			'path' => $this->escape($this->path($path, APP_BASE_PATH . $dirName, '.css')),
 			'options' => $options,
 			'type' => 'stylesheet'
 		);
@@ -88,7 +88,7 @@ class Html extends Helper
 		$dirName = defined('JS_DIR') ? JS_DIR : 'js';
 		
 		$replace = array(
-			'path' => $this->path($path, APP_BASE_PATH . $dirName, '.js'),
+			'path' => $this->escape($this->path($path, APP_BASE_PATH . $dirName, '.js')),
 			'options' => $options
 		);
 		
@@ -103,7 +103,7 @@ class Html extends Helper
 		$tag = '<img src="{:url}" {:options} />';
 		
 		$replace = array(
-			'url' => $this->path($url),
+			'url' => $this->escape($this->path($url)),
 			'options' => $options
 		);
 		

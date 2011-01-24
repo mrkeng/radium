@@ -17,11 +17,23 @@ use \radium\data\Resource;
  */
 class Model extends ArrayAccessable
 {
-	private static $collection;
+	/**
+	 *
+	 */
 	private static function _instance()
 	{
 		$class = get_called_class();
 		return new $class();
+	}
+	
+	/**
+	 * アダプターを取得
+	 * @return array
+	 */
+	public static function getAdapter()
+	{
+		$instance = static::_instance();
+		return $instance->_adapter;
 	}
 	
 	/**
@@ -121,13 +133,26 @@ class Model extends ArrayAccessable
 	}
 	
 	/**
+	 * 更新
+	 * @param array $conditions 条件
+	 * @param array $values 更新後の値
+	 */
+	public static function update(array $conditions, array $values = array())
+	{
+		$instance = static::_instance();
+		
+		$adapter = $instance->_adapter;
+		return $adapter->update($conditions, $values);
+	}
+	
+	/**
 	 *
 	 */
-	public static function deleteAll()
+	public static function deleteAll(array $conditions)
 	{
 		$instance = static::_instance();
 		$adapter = $instance->_adapter;
-		return $adapter->deleteAll();
+		return $adapter->deleteAll($conditions);
 	}
 	
 	protected $_class;
@@ -146,13 +171,15 @@ class Model extends ArrayAccessable
 			$this->_class = strtolower(substr($class, strrpos($class, '\\') + 1));
 		}
 		
-		// adapter
+		// Resource
 		$resource = Resource::get($this->_resource);
 		
-		$adapter = $resource['adapter'];
+		$data = $resource->data;
+		$adapter = $data[0]['adapter'];
 		$adapter = str_replace('.', '\\', $adapter);
 		
-		$this->_adapter = new $adapter($this, $resource);
+		// Adapter
+		$this->_adapter = new $adapter($this, $data);
 	}
 	
 	/**
