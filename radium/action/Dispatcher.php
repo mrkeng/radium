@@ -72,14 +72,6 @@ final class Dispatcher extends Object
 		$controller = 'home';
 		$action = 'index';
 		
-		
-		if (!defined('APP_BASE_PATH')) {
-			define('APP_BASE_PATH', '/');
-		}
-		if (!defined('DEFAULT_CONTROLLER')) {
-			define('DEFAULT_CONTROLLER', 'home');
-		}
-		
 		StringUtil::getLocalizedString('');
 		
 		// URI を分割します

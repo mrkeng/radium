@@ -172,7 +172,7 @@ final class Router extends Object
 				$key = str_replace('{:args}', '______args_____', $key);
 				$key = preg_quote($key);
 				$key = str_replace('/', '\\/', $key);
-				$key = str_replace('______args_____', '([-_+a-zA-Z0-9]+)', $key);
+				$key = str_replace('______args_____', '([-_+a-zA-Z0-9%]+)', $key);
 				
 				if (preg_match('/^' . $key . '$/', $url, $matches)) {
 					array_shift($matches);

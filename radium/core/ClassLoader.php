@@ -21,6 +21,7 @@ final class ClassLoader extends Object
 	 */
 	public static function init()
 	{
+		set_include_path(get_include_path() . ':' . RADIUM_APP_PATH . DIRECTORY_SEPARATOR . 'libraries');
 		spl_autoload_register('\radium\core\ClassLoader::load');
 	}
 	
@@ -38,6 +39,8 @@ final class ClassLoader extends Object
 			RADIUM_PATH,
 			RADIUM_APP_PATH . DIRECTORY_SEPARATOR . 'libraries'
 		);
+		$prefixes = array_merge($prefixes, explode(':', get_include_path()));
+		
 		foreach ($prefixes as $prefix) {
 			$path = $prefix . DIRECTORY_SEPARATOR . $classFile;
 			if (file_exists($path) && include_once($path)) {

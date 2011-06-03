@@ -18,6 +18,7 @@ use \radium\utils\StringUtil;
 final class Request extends Object
 {
 	private $_config;
+	private $queryString;
 	
 	public $params;
 	
@@ -28,7 +29,13 @@ final class Request extends Object
 	{
 		parent::__construct();
 		
-		$this->_config = array();
+		$this->_config = array(
+			'queryString' => '',
+		);
+		
+		if (strpos($_SERVER['REQUEST_URI'], '?') > 0) {
+			$this->_config['queryString'] = substr($_SERVER['REQUEST_URI'], strpos($_SERVER['REQUEST_URI'], '?'));
+		}
 		
 		// uri
 		$uri = $_SERVER['REQUEST_URI'];
@@ -69,6 +76,8 @@ final class Request extends Object
 				return $this->_config['data'];
 			case 'query':
 				return $this->_config['query'];
+			case 'queryString':
+				return $this->_config['queryString'];
 		}
 		
 		throw new ErrorException(StringUtil::getLocalizedString('{1} is an illegal property.', array($name)), INVALID_PROPERTY);

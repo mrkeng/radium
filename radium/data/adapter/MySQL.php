@@ -11,19 +11,18 @@ namespace radium\data\adapter;
 use \ErrorException;
 use \Exception;
 use \InvalidArgumentException;
-use \Mongo;
-use \MongoConnnectionException;
-use \MongoCursorException;
+use \PDO;
+use \PDOException;
 use \radium\core\Object;
 use \radium\data\Resource;
 use \radium\errors\DatabaseError;
 
 /**
- * MongoDB のアダプタ
+ * MySQL のアダプタ
  */
-class MongoDB extends Object
+class MySQL extends Object
 {
-	private static $collections = array();
+	private static $dbh = array();
 	public static $count = 0;
 	
 	/**
@@ -32,31 +31,52 @@ class MongoDB extends Object
 	 */
 	private static function _conditions(array $conditions = array())
 	{
-		$operators = array(
-			'<' => '$lt',
-			'>' => '$gt',
-			'<=' =>  '$lte',
-			'>=' => '$gte',
-			'!=' => '$ne',
-			'<>' => '$ne'
-		);
+		/*
+		'conditions' => array(
+			'accountId' => $this->id,
+			'deleted' => array('!=' => true),
+			'or' => array(
+				array('name' => 'hoge'),
+				array('name' => array('!=' => 'fuga'))
+			)
+		),
+		*/
 		
-		$results = array();
+		$placeholders = array();
+		$values = array();
 		foreach ($conditions as $key => $value) {
 			if (is_array($value)) {
 				$values = $value;
 				$value = array();
 				foreach ($values as $k => $v) {
-					$value[isset($operators[$k]) ? $operators[$k] : $k] = $v;
+					if ($k == 'or') {
+						$orList = array();
+						foreach ($v as $vv) {
+							foreach ($vv as $k2 => $v2) {
+								// TODO
+							}
+						}
+						//$placeholders[] = implode(' OR ', $orList);
+					} else {
+						$placeholders[] = $key . ' ' . $k . ' :' . $key;
+						$values[] = $v;
+					}
 				}
+			} else {
+				$placeholders[] = $key . ' = :' . $key;
+				$values[] = $value;
 			}
-			$results[$key] = $value;
 		}
-		return $results;
+		
+		if (count($placeholders) == 0) return null;
+		return array(
+			'placeholders' => implode(' AND ', $placeholders),
+			'values' => $values
+		);
 	}
 	
 	protected $model;
-	protected $collectionName;
+	protected $tableName;
 	protected $resource;
 	
 	/**
@@ -67,14 +87,14 @@ class MongoDB extends Object
 		parent::__construct();
 		
 		$this->model = $model;
-		$this->collectionName = $model->className();
+		$this->tableName = $model->className();
 		$this->resource = $resource;
 	}
 	
 	/**
-	 * コレクションを取得
+	 * データベースハンドラを取得
 	 */
-	public function getCollection($master = false)
+	public function getDatabaseHandler($master = false)
 	{
 		static::$count++;
 		if ($master) {
@@ -89,33 +109,27 @@ class MongoDB extends Object
 		
 		$host = $resource['host'];
 		$databaseName = $resource['database'];
+		$user = isset($resource['user']) ? $resource['user'] : null;
+		$password = isset($resource['password']) ? $resource['password'] : null;
 		
-		$key = implode('_', array($host, $databaseName, $this->collectionName));
-		if (isset(static::$collections[$key])) return static::$collections[$key];
+		$dsn = 'mysql:dbname=' . $databaseName . ';host=' . $host;
+		
+		if (isset(static::$dbh[$dsn])) return static::$dbh[$dsn];
 		
 		//echo ' ' . $key . '<br /> ';
 		
-		$collection = null;
+		$dbh = null;
 		try {
+			$dbh = new PDO($dsn, $user, $password, array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
+			static::$dbh[$dsn] = $dbh;
 			
-			$mongo = new Mongo('mongodb://' . $host, array("persist" => ""));
-			//$mongo = new Mongo('mongodb://' . $host);
-			$database = $mongo->selectDB($databaseName);
-			$collection = $database->selectCollection($this->collectionName);
-			
-			static::$collections[$key] = $collection;
-			
-		} catch (MongoConnnectionException $e) {
-			throw new DatabaseError($e->getMessage());
-		} catch (InvalidArgumentException $e) {
-			throw new DatabaseError($e->getMessage());
-		} catch (ErrorException $e) {
+		} catch (PDOException $e) {
 			throw new DatabaseError($e->getMessage());
 		} catch (Exception $e) {
 			throw new DatabaseError($e->getMessage());
 		}
 		
-		return $collection;
+		return $dbh;
 	}
 	
 	/**
@@ -126,28 +140,44 @@ class MongoDB extends Object
 	 */
 	public function find(array $options = array(), $raw = false)
 	{
-		$collection = $this->getCollection();
-		$cursor = $collection->find(static::_conditions($options['conditions']));
+		$dbh = $this->getDatabaseHandler();
 		
-		if (isset($options['order'])) $cursor->sort($options['order']);
-		if (isset($options['offset'])) $cursor->skip($options['offset']);
-		if (isset($options['limit'])) $cursor->limit($options['limit']);
+		$sql = 'SELECT * FROM ' . $this->tableName;
+		
+		$conditions = static::_conditions($options['conditions']);
+		if ($conditions) {
+			$sql .= ' WHERE ' . $conditions['placeholders'];
+		}
+		
+		if (isset($options['order'])) {
+			$order = $options['order'];
+			$orders = array();
+			foreach ($order as $key => $value) {
+				$orders[] = $key . ' ' . ($value == -1 ? 'DESC' : 'ASC');
+			}
+			$sql .= ' ORDER BY ' . implode(', ', $orders);
+		}
+		if (isset($options['limit'])) {
+			$sql .= ' LIMIT ' . intval($options['limit']);
+		}
+		if (isset($options['offset'])) {
+			$sql .= ' OFFSET ' . intval($options['offset']);
+		}
+		
+		$sth = $dbh->prepare($sql);
+		$sth->execute($conditions ? $conditions['values'] : null);
 		
 		$modelClass = get_class($this->model);
 		
 		$list = array();
-		while ($data = $cursor->getNext()) {
-			if ($raw) {
-				$list[] = $data;
-				continue;
+		if ($raw) {
+			while ($obj = $sth->fetch(PDO::FETCH_ASSOC)) {
+				$list[] = $obj;
 			}
-			
-			$model = new $modelClass();
-			
-			foreach ($data as $key => $value) {
-				$model->$key = $value;
+		} else {
+			while ($data = $sth->fetchObject($modelClass)) {
+				$list[] = $obj;
 			}
-			$list[] = $model;
 		}
 		
 		return $list;
@@ -160,7 +190,7 @@ class MongoDB extends Object
 	 */
 	public function count(array $conditions = array())
 	{
-		$collection = $this->getCollection();
+		$dbh = $this->getDatabaseHandler();
 		$cursor = $collection->find(static::_conditions($conditions));
 		return $cursor->count();
 	}
@@ -172,7 +202,7 @@ class MongoDB extends Object
 	 */
 	public function update(array $conditions, array $values = array(), array $options = array())
 	{
-		$collection = $this->getCollection(true);
+		$dbh = $this->getDatabaseHandler(true);
 		
 		$options += array(
 			'upsert' => false,
@@ -192,7 +222,7 @@ class MongoDB extends Object
 	 */
 	public function save()
 	{
-		$collection = $this->getCollection(true);
+		$dbh = $this->getDatabaseHandler(true);
 		
 		$model = $this->model;
 		$data = $model->data();
@@ -215,7 +245,7 @@ class MongoDB extends Object
 		$model = $this->model;
 		$data = $model->data();
 		if (isset($data['_id'])) {
-			$collection = $this->getCollection(true);
+			$dbh = $this->getDatabaseHandler(true);
 			try {
 				return $collection->remove(array('_id' => $data['_id']), array("justOne" => true, 'safe' => true));
 				return $result['n'];
@@ -233,7 +263,7 @@ class MongoDB extends Object
 	 */
 	public function deleteAll(array $conditions)
 	{
-		$collection = $this->getCollection(true);
+		$dbh = $this->getDatabaseHandler(true);
 		
 		try {
 			$result =  $collection->remove(static::_conditions($conditions), array('safe' => true));

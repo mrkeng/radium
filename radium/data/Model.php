@@ -137,12 +137,12 @@ class Model extends ArrayAccessable
 	 * @param array $conditions 条件
 	 * @param array $values 更新後の値
 	 */
-	public static function update(array $conditions, array $values = array())
+	public static function update(array $conditions, array $values = array(), array $options = array())
 	{
 		$instance = static::_instance();
 		
 		$adapter = $instance->_adapter;
-		return $adapter->update($conditions, $values);
+		return $adapter->update($conditions, $values, $options);
 	}
 	
 	/**

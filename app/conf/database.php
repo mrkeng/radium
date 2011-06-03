@@ -9,5 +9,13 @@
 use \radium\data\Resource;
 
 // データベース
-Resource::add('default', array('host' => 'localhost', 'database' => 'radium'));
+Resource::add('default', array(
+		'host' => 'localhost',
+		'database' => 'radium'
+	));
 
+//Resource::add('default', array(
+//		'host' => 'localhost',
+//		'database' => 'radium',
+//		'adapter' => 'radium.data.adapter.MySQL'
+//	));
