@@ -43,10 +43,17 @@ final class Request extends Object
 			$uri = substr($uri, 0, strpos($uri, '?'));
 		}
 		
-		$basePath = defined('APP_BASE_PATH') ? APP_BASE_PATH : '/';
-		if (strpos($uri, $basePath) == '0') {
-			$uri = substr($uri, strlen($basePath));
+		// base
+		$base = str_replace('\\', '/', dirname($_SERVER['PHP_SELF']));
+		$base = rtrim(str_replace(array("/app/webroot", '/webroot'), '', $base), '/');
+		$idx = strlen($base);
+		if ($base) {
+			$idx += strpos($uri, $base);
 		}
+		$appBase = substr($uri, 0, $idx);
+		$uri = substr($uri, $idx);
+		
+		if (!defined('RADIUM_APP_BASE_URI')) define('RADIUM_APP_BASE_URI', $appBase . '/');
 		
 		$argPos = strpos($uri, '?');
 		if ($argPos > 0) $uri = substr($uri, 0, $argPos);
@@ -57,6 +64,9 @@ final class Request extends Object
 		$this->_config['uri'] = $uri;
 		
 		// data and query
+		$this->_config['server'] = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'];
+		$this->_config['appBaseURI'] = RADIUM_APP_BASE_URI;
+		$this->_config['base'] = $base;
 		$this->_config['data'] = $this->_config['query'] = array();
 		$this->_config['data'] += $_POST;
 		$this->_config['query'] += $_GET;
@@ -70,6 +80,8 @@ final class Request extends Object
 	public function __get($name)
 	{
 		switch ($name) {
+			case 'baseURI':
+				return $this->_config['server'] . $this->_config['appBaseURI'];
 			case 'uri':
 				return $this->_config['uri'];
 			case 'data':

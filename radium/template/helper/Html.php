@@ -65,7 +65,7 @@ class Html extends Helper
 		$dirName = defined('CSS_DIR') ? CSS_DIR : 'css';
 		
 		$replace = array(
-			'path' => $this->escape($this->path($path, APP_BASE_PATH . $dirName, '.css')),
+			'path' => $this->escape($this->path($path, RADIUM_APP_BASE_URI . $dirName, '.css')),
 			'options' => $options,
 			'type' => 'stylesheet'
 		);
@@ -88,7 +88,7 @@ class Html extends Helper
 		$dirName = defined('JS_DIR') ? JS_DIR : 'js';
 		
 		$replace = array(
-			'path' => $this->escape($this->path($path, APP_BASE_PATH . $dirName, '.js')),
+			'path' => $this->escape($this->path($path, RADIUM_APP_BASE_URI . $dirName, '.js')),
 			'options' => $options
 		);
 		

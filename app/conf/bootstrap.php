@@ -28,9 +28,6 @@ if (function_exists('date_default_timezone_set')) date_default_timezone_set('Asi
 
 
 // 定数をセット
-define('APP_URL', 'http://' . $_SERVER['SERVER_NAME'] . '/');
-define('APP_BASE_PATH', '/');
-
 define('RADIUM_PATH', dirname(dirname(__DIR__)));
 define('RADIUM_APP_PATH', RADIUM_PATH . '/app');
 define('RADIUM_PLUGIN_PATH', RADIUM_APP_PATH . '/plugins');

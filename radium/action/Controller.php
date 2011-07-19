@@ -113,7 +113,7 @@ class Controller extends Object
 			
 			$server = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'];
 			
-			$to = $server . APP_BASE_PATH . $url;
+			$to = $server . RADIUM_APP_BASE_URI . $url;
 		}
 		
 		header('Location: ' . $to);

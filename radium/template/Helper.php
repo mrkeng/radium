@@ -57,14 +57,14 @@ class Helper extends Object
 			if (is_null($path)) $path = '';
 			$controller = $this->controller;
 			$request = new Request();
-			return APP_BASE_PATH . substr($request->uri, 1) . $path;
+			return RADIUM_APP_BASE_URI . substr($request->uri, 1) . $path;
 		} elseif (preg_match('/^\#/', $path)) {
 			return $path;
 		} elseif (!preg_match('/^https?:\\/\\//', $path)) {
 			
 			if (is_null($prefix)) {
 				if (substr($path, 0, 1) == '/') $path = substr($path, 1);
-				$path = APP_BASE_PATH . $path;
+				$path = RADIUM_APP_BASE_URI . $path;
 			} elseif (preg_match('/^\\//', $path)) {
 				$path = $path;
 			} else {
