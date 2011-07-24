@@ -110,10 +110,7 @@ class Controller extends Object
 		$to = $url;
 		if (!preg_match('/^(https?|mailto):\\/\\//', $url)) {
 			$url = preg_replace('/^\\//', '', $url);
-			
-			$server = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'];
-			
-			$to = $server . RADIUM_APP_BASE_URI . $url;
+			$to = $this->request->baseURI . $url;
 		}
 		
 		header('Location: ' . $to);

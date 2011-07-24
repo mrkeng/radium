@@ -63,8 +63,13 @@ final class Request extends Object
 		
 		$this->_config['uri'] = $uri;
 		
+		$domain = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'];
+		if (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] != 80) {
+			$domain .= ':' . $_SERVER['SERVER_PORT'];
+		}
+		
 		// data and query
-		$this->_config['server'] = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['SERVER_NAME'];
+		$this->_config['domain'] = $domain;
 		$this->_config['appBaseURI'] = RADIUM_APP_BASE_URI;
 		$this->_config['base'] = $base;
 		$this->_config['data'] = $this->_config['query'] = array();
@@ -81,7 +86,7 @@ final class Request extends Object
 	{
 		switch ($name) {
 			case 'baseURI':
-				return $this->_config['server'] . $this->_config['appBaseURI'];
+				return $this->_config['domain'] . $this->_config['appBaseURI'];
 			case 'uri':
 				return $this->_config['uri'];
 			case 'data':
