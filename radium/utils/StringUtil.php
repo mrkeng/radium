@@ -52,8 +52,7 @@ final class StringUtil
 		$result = preg_replace('/([^_A-Z])([A-Z])/','$1_$2', $result);
 		$result = strtolower($result);
 		
-		if (!preg_match('/^[A-Z][A-Z]/', $str) && !preg_match('/^[a-z0-9]/', $str))
-		{
+		if (!preg_match('/^[A-Z][A-Z]/', $str) && !preg_match('/^[a-z0-9]/', $str)) {
 			$result = substr($result, 1);
 		}
 		
@@ -100,8 +99,7 @@ final class StringUtil
 					$langParam = $_GET['lang'];
 					if ($langParam == '' || $langParam == 'default') {
 						Session::delete('lang');
-					}
-					else {
+					} else {
 						Session::write('lang', $langParam);
 					}
 				}
@@ -121,8 +119,7 @@ final class StringUtil
 								break;
 							}
 						}
-					}
-					else if (preg_match('/^[a-z]+$/', $l)) {
+					} else if (preg_match('/^[a-z]+$/', $l)) {
 						foreach ($langResources as $langResource) {
 							list($locale, $country) = explode('_', $langResource);
 							if ($locale == $l) {
@@ -135,6 +132,8 @@ final class StringUtil
 				}
 			}
 			if (!defined('DEFAULT_LANG')) define('DEFAULT_LANG', 'en_US');
+			
+			Session::write('lang', DEFAULT_LANG);
 		}
 		
 		$result = $key;
@@ -142,8 +141,7 @@ final class StringUtil
 		$radiumLocaleResources = static::$radiumLocaleResources;
 		if (isset($radiumLocaleResources[DEFAULT_LANG][$key])) {
 			$result = $radiumLocaleResources[DEFAULT_LANG][$key];
-		}
-		else if (isset($radiumLocaleResources['en_US'][$key])) {
+		} else if (isset($radiumLocaleResources['en_US'][$key])) {
 			$result = $radiumLocaleResources['en_US'][$key];
 		}
 		

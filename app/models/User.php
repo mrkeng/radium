@@ -8,7 +8,7 @@
 
 namespace app\models;
 	
-class Account extends \radium\data\Model
+class User extends \radium\data\Model
 {
-	protected $_class = 'accounts';
+	protected $_class = 'users';
 }

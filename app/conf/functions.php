@@ -21,10 +21,21 @@ function ll($key, array $params = array(), $lang = null)
 
 
 /**
+ * 文字列をエスケープして出力
+ * @param string $str 文字列
+ * @param bool true の場合は出力しないで return する
+ */
+function ee($str, $return = false) {
+	$str = StringUtil::escape($str);
+	if ($return) return $str;
+	echo $str;
+}
+
+
+/**
  * セッション
  */
 /*
-ini_set('session.save_path', '/var/lib/php/session');
 function sess_open($save_path, $session_name)
 {
 	return true;
@@ -35,8 +46,11 @@ function sess_close()
 }
 function sess_read($id)
 {
-	global $sess_save_path;
-	$session = \app\models\Session::findOne(array('id' => $id));
+	try {
+		$session = Session::findOne(array('id' => $id)); // mongodb
+		//$session = Session::find($id); // php-activerecord
+	} catch (Exception $exception) {
+	}
 	if ($session) {
 		return $session->data;
 	}
@@ -44,14 +58,19 @@ function sess_read($id)
 }
 function sess_write($id, $data)
 {
-	$session = \app\models\Session::findOne(array('id' => $id));
+	$session = null;
+	try {
+		$session = Session::findOne(array('id' => $id)); // mongodb
+		//$session = Session::find($id); // php-activerecord
+	} catch (Exception $exception) {
+	}
 	if ($session) {
 		if (!$data) {
 			return $session->delete();
 		}
 	} else {
 		if (!$data) return true;
-		$session = \app\models\Session::create(array(
+		$session = Session::create(array(
 			'id' => $id,
 		));
 	}
@@ -61,13 +80,28 @@ function sess_write($id, $data)
 }
 function sess_destroy($id)
 {
-	return \app\models\Session::deleteAll(array('id' => $id));
+	try {
+		$session = Session::findOne(array('id' => $id)); // mongodb
+		//$session = Session::find($id); // php-activerecord
+	} catch (Exception $exception) {
+	}
+	if ($session) $session->delete();
+	return true;
 }
 
 function sess_gc($maxlifetime)
 {
-	//return true;
+	// mongodb
 	return \app\models\Session::deleteAll(array('timestamp' => array('<' => time() - $maxlifetime)));
+	
+	// php-activerecord
+	//Session::table()->delete_all(array(
+	//	'conditions' => array(
+	//		'timestamp < ?', (time() - $maxlifetime),
+	//	)
+	//));
+	//return true;
 }
+ini_set('session.save_path', '/var/lib/php/session');
 session_set_save_handler("sess_open", "sess_close", "sess_read", "sess_write", "sess_destroy", "sess_gc");
 */

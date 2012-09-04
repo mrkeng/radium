@@ -56,7 +56,7 @@ class Controller extends Object
 	/**
 	 * テンプレートに送るデータをセット
 	 */
-	protected function params($name, $value = null, $force = false)
+	protected function param($name, $value = null, $force = false)
 	{
 		if ($value !== null || $force) {
 			$this->_params[$name] = $value;
@@ -64,21 +64,36 @@ class Controller extends Object
 		
 		return isset($this->_params[$name]) ? $this->_params[$name] : null;
 	}
+	protected function params($name, $value = null, $force = false)
+	{
+		return $this->param($name, $value, $force);
+	}
 	
 	/**
 	 * JSON 出力
 	 * @param array $json
 	 */
-	final public function json(array $json)
+	public function json(array $json)
 	{
 		$this->render(array('json' => $json));
+	}
+	
+	/**
+	 * print_r 出力
+	 * @param array $obj
+	 */
+	public function print_r($obj)
+	{
+		header('Content-Type: text/plain');
+		print_r($obj);
+		exit;
 	}
 	
 	/**
 	 * レンダリング
 	 * @param array $options
 	 */
-	final public function render(array $options = array())
+	public function render(array $options = array())
 	{
 		if ($this->_renderedContent) return;
 		
@@ -105,7 +120,7 @@ class Controller extends Object
 	 * リダイレクト
 	 * @param string $url
 	 */
-	final public function redirect($url)
+	public function redirect($url)
 	{
 		$to = $url;
 		if (!preg_match('/^(https?|mailto):\\/\\//', $url)) {
@@ -121,7 +136,7 @@ class Controller extends Object
 	/**
 	 * 他のコントローラのアクションを呼ぶ
 	 */
-	final public function call($controller, $action, array $args = array())
+	public function call($controller, $action, array $args = array())
 	{
 		return $this->dispatcher->dispatch($controller, $action, $args);
 	}
@@ -129,7 +144,7 @@ class Controller extends Object
 	/**
 	 * レンダリング済みコンテンツを取得
 	 */
-	final public function renderedContent()
+	public function renderedContent()
 	{
 		return $this->_renderedContent;
 	}
@@ -137,7 +152,7 @@ class Controller extends Object
 	/**
 	 * ファイナライズ
 	 */
-	final protected function _finalize(array $data = array())
+	protected function _finalize(array $data = array())
 	{
 		$this->render(array(
 			'data' => $data

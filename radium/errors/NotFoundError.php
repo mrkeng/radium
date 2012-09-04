@@ -15,7 +15,7 @@ use \ErrorException;
  */
 final class NotFoundError extends ErrorException
 {
-	public function __construct($message = null, $code = 0)
+	public function __construct($message = null, $code = 404)
 	{
 		parent::__construct($message, $code);
 	}

@@ -24,7 +24,6 @@ use \radium\errors\DatabaseError;
 class MongoDB extends Object
 {
 	private static $collections = array();
-	public static $count = 0;
 	
 	/**
 	 * 条件式の変換
@@ -76,7 +75,6 @@ class MongoDB extends Object
 	 */
 	public function getCollection($master = false)
 	{
-		static::$count++;
 		if ($master) {
 			$resource = $this->resource[0];
 		} else {

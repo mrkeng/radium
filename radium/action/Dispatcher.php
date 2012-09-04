@@ -42,13 +42,6 @@ final class Dispatcher extends Object
 		}
 		
 		header('Content-Type: ' . $contentType .  '; charset=UTF-8');
-		
-		if (defined('START_TIME') && function_exists('microtime_float')) {
-			header('X-Process-Time: ' . (microtime_float() - START_TIME));
-		}
-		
-		header('X-Dbc: ' . \radium\data\adapter\MongoDB::$count);
-		
 		echo $output;
 	}
 	

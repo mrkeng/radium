@@ -31,12 +31,6 @@ final class Router extends Object
 		
 		$controller = null;
 		if (preg_match('/^[a-zA-Z]/', $arg)) {
-			// プラグインをチェック
-			if (self::plugin_exists($arg)) {
-				$plugin = $arg;
-				$arg = count($args) > 0 ? array_shift($args) : '';
-			}
-			
 			// コントローラのチェック
 			if (preg_match('/^[a-zA-Z]/', $arg)) {
 				$controller = $arg;
@@ -116,7 +110,7 @@ final class Router extends Object
 				
 				$checkKey = preg_quote($checkKey);
 				$checkKey = str_replace('/', '\\/', $checkKey);
-				$checkKey = str_replace('______param_____', '([-_+a-zA-Z0-9]+)', $checkKey);
+				$checkKey = str_replace('______param_____', '([-_.+a-zA-Z0-9]+)', $checkKey);
 				
 				if (preg_match('/^' . $checkKey . '$/', $url, $matches)) {
 					$data = array();
@@ -172,11 +166,11 @@ final class Router extends Object
 				$key = str_replace('{:args}', '______args_____', $key);
 				$key = preg_quote($key);
 				$key = str_replace('/', '\\/', $key);
-				$key = str_replace('______args_____', '([-_+a-zA-Z0-9%]+)', $key);
+				$key = str_replace('______args_____', '([-_.+a-zA-Z0-9%]+)', $key);
 				
 				if (preg_match('/^' . $key . '$/', $url, $matches)) {
 					array_shift($matches);
-					
+					foreach ($matches as &$str) $str = urldecode($str);
 					$route['args'] = $matches;
 					return $route;
 				}
@@ -199,22 +193,5 @@ final class Router extends Object
 		$route['args'] = $args;
 		
 		return $route;
-	}
-	
-	/**
-	 * プラグインの存在確認
-	 * @param string $plugin プラグイン名
-	 */
-	private static function plugin_exists($plugin)
-	{
-		$class = StringUtil::camelcase($plugin);
-		$pluginFile = RADIUM_PLUGIN_PATH . '/' . $class . '.php';
-		
-		if (file_exists($pluginFile)) {
-			include $pluginFile;
-			return true;
-		}
-		
-		return false;
 	}
 }

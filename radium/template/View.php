@@ -8,9 +8,9 @@
 
 namespace radium\template;
 
+use \ErrorException;
 use \radium\action\Controller;
 use \radium\core\Object;
-use \radium\errors\NotFoundError;
 use \radium\template\helper\Html;
 use \radium\template\helper\Form;
 use \radium\utils\StringUtil;
@@ -121,7 +121,7 @@ class View extends Object
 	{
 		// テンプレートが見つからない！
 		if (!file_exists($template)) {
-			throw new NotFoundError(StringUtil::getLocalizedString('Template "{1}" is not found.', array($template)), TEMPLATE_NOT_FOUND);
+			throw new ErrorException(StringUtil::getLocalizedString('Template "{1}" is not found.', array($template)), TEMPLATE_NOT_FOUND);
 		}
 		
 		$html = $this->html;

@@ -8,9 +8,12 @@
 
 namespace app\controllers;
 
-class HomeController extends AbstractBaseController
+abstract class AbstractBaseController extends \radium\action\Controller
 {
-	public function index()
+	/**
+	 * 共通処理
+	 */
+	protected function _init()
 	{
 	}
 }

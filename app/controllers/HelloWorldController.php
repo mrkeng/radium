@@ -8,7 +8,7 @@
 
 namespace app\controllers;
 
-class HelloWorldController extends \radium\action\Controller
+class HelloWorldController extends AbstractBaseController
 {
 	/**
 	 * 文字列を表示
@@ -28,7 +28,7 @@ class HelloWorldController extends \radium\action\Controller
 	}
 	
 	/**
-	 * [JSON-API]アンケート用マスタデータをロード
+	 * 文字列を表示
 	 */
 	public function hello()
 	{
@@ -38,12 +38,12 @@ class HelloWorldController extends \radium\action\Controller
 	/**
 	 * json
 	 */
-	public function show_json()
+	public function show_json($arg = 'world')
 	{
 		$json = array(
-			'hello' => 'world'
+			'hello' => $arg
 		);
 		
-		$this->render(array('json' => $json));
+		$this->json($json);
 	}
 }

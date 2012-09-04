@@ -7,15 +7,19 @@
  */
 
 error_reporting(E_ALL | E_STRICT);
+//error_reporting(0);
+
 
 /**
  * サービス定義
  */
 
+
 /**
  * デバッグ
  */
 define('DEBUG', 1);
+
 
 /**
  * ローカライズ設定
@@ -30,7 +34,6 @@ if (function_exists('date_default_timezone_set')) date_default_timezone_set('Asi
 // 定数をセット
 define('RADIUM_PATH', dirname(dirname(__DIR__)));
 define('RADIUM_APP_PATH', RADIUM_PATH . '/app');
-define('RADIUM_PLUGIN_PATH', RADIUM_APP_PATH . '/plugins');
 define('RADIUM_LIBRARY_PATH', RADIUM_PATH . '/radium');
 
 define('NOT_FOUND', 404);
@@ -43,6 +46,7 @@ define('CONNECT_DATABASE_ERROR', 6);
 define('INVALID_METHOD', 7);
 define('INVALID_PROPERTY', 8);
 
+
 // コアライブラリを読み込み
 require __DIR__ . '/libraries.php';
 
@@ -53,4 +57,4 @@ require __DIR__ . '/database.php';
 require __DIR__ . '/routes.php';
 
 // グローバル関数を読み込み
-require __DIR__ . '/global_functions.php';
+require __DIR__ . '/functions.php';
