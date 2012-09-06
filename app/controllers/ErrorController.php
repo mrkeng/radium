@@ -2,13 +2,14 @@
 /**
  * radium: the most RAD PHP Framework
  *
- * @copyright Copyright 2011, Playwell Inc.
+ * @copyright Copyright 2012, Playwell Inc.
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
 namespace app\controllers;
 
 use \radium\errors\NotFoundError;
+use \radium\errors\UserError;
 use \radium\utils\StringUtil;
 
 class ErrorController extends \radium\action\Controller
@@ -25,6 +26,14 @@ class ErrorController extends \radium\action\Controller
 			header("Status: 404 Not Found");
 		}
 		
-		return compact('exception');
+		$errorMessage = StringUtil::getLocalizedString('Sorry, Internal Server Error.');
+		
+		if ($exception instanceof UserError) {
+			$errorMessage = $exception->getMessage();
+		} else if (defined('DEBUG') && DEBUG) {
+			$errorMessage .= ' (' . $exception->getMessage() . ')';
+		}
+		
+		return compact('exception', 'errorMessage');
 	}
 }

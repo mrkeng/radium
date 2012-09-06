@@ -2,7 +2,7 @@
 /**
  * radium: the most RAD PHP Framework
  *
- * @copyright Copyright 2011, Playwell Inc.
+ * @copyright Copyright 2012, Playwell Inc.
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
@@ -19,6 +19,7 @@ $radiumLocaleResources['ja_JP'] = array(
 	'Exception was thrown. ({1}): {2} at {3} line {4} ({5} line {6})' => '例外が発生しました ({1}): {2} at {3} line {4} ({5} line {6})',
 	'{1} is an illegal property.' => '不正なプロパティです({1})',
 	'Sorry, Database is down...' => '申し訳ありません. データベースがダウンしています.',
+	'Sorry, Internal Server Error.' => '申し訳ありません. サーバーでエラーが発生しています.',
 	
 	'Welcome to radium PHP Framework!' => 'radium PHP フレームワークへようこそ！',
 	'Default Language of Web Browser' => 'ウェブブラウザの標準言語',

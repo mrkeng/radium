@@ -2,7 +2,7 @@
 /**
  * radium: the most RAD PHP Framework
  *
- * @copyright Copyright 2011, Playwell Inc.
+ * @copyright Copyright 2012, Playwell Inc.
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
@@ -25,6 +25,14 @@ class HelloWorldController extends AbstractBaseController
 	public function show($str = null)
 	{
 		return compact('str');
+	}
+	
+	/**
+	 * 文字列を表示
+	 * @param string $str 文字列
+	 */
+	public function eecho($str) {
+		return $str;
 	}
 	
 	/**

@@ -11,11 +11,11 @@ namespace radium\errors;
 use \ErrorException;
 
 /**
- * データが見つからないエラー
+ * ユーザエラー
  */
-final class NotFoundError extends ErrorException
+class UserError extends ErrorException
 {
-	public function __construct($message = null, $code = 404)
+	public function __construct($message = null, $code = 0)
 	{
 		parent::__construct($message, $code);
 	}
