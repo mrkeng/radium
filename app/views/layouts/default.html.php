@@ -46,7 +46,7 @@ if (!$title) {
 <header class="navbar navbar-fixed-top">
 	<div class="navbar-inner">
 		<div class="container">
-			<a class="brand" href="#"><?php echo $this->title(); ?></a>
+			<?php echo $this->html->link($this->title(), '', array('class' => 'brand')); ?>
 		</div>
 	</div>
 </header>
