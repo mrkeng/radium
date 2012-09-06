@@ -6,8 +6,6 @@
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-$this->title('radium PHP Framework');
-
 ?>
 <section>
 	<h2><?php echo ll('Welcome to radium PHP Framework!'); ?></h2>

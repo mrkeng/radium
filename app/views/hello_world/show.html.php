@@ -6,10 +6,8 @@
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-$this->title('Show');
-
 ?>
 <section>
-	<h2><?php echo $this->title(); ?></h2>
+	<h2><?php ee(ll('Show')); ?></h2>
 	<article><?php echo $this->html->escape($str); ?></article>
 </section>

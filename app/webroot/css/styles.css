@@ -25,3 +25,36 @@ th,td
 	padding: 3px 5px;
 	border: 1px solid #999;
 }
+p {
+	margin: 1em 0;
+}
+
+
+/*
+ * ====================
+ *  HEADER
+ * ====================
+ */
+header {
+}
+
+/*
+ * ====================
+ *  CONTENT
+ * ====================
+ */
+#content-wrapper {
+	margin: 40px 0 60px;
+}
+
+
+/*
+ * ====================
+ *  FOOTER
+ * ====================
+ */
+footer {
+}
+footer p {
+	
+}

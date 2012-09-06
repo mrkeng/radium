@@ -6,10 +6,11 @@
  * @license   http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-$this->title(ll('Hello World!'));
-
 ?>
-<p><?php echo $this->html->link('< ' . ll('Back'), ''); ?></p>
+<ul class="breadcrumb">
+	<li><?php echo $this->html->link(ll('Home'), ''); ?> <span class="divider">/</span></li>
+	<li class="active"><?php ee(ll('Hello World!')); ?></li>
+</ul>
 <section>
-	<h2><?php echo $this->title(); ?></h2>
+	<h2><?php ee(ll('Hello World!')); ?></h2>
 </section>
