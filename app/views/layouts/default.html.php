@@ -25,10 +25,11 @@ if (!$title) {
 <?php echo $this->html->charset();?>
 
 <title><?php echo $this->title(); ?></title>
+<meta name="viewport" content="user-scalable=no; initial-scale=1.0; minimum-scale=1.0; maximum-scale=1.0" />
 <?php echo $this->ogp(); ?>
 
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css" />
-<script type="text/javascript" src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/css/bootstrap-combined.min.css" />
+<script type="text/javascript" src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.1.1/js/bootstrap.min.js"></script>
 <!--[if IE]>
 <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 <![endif]-->

@@ -8,6 +8,7 @@
 
 namespace radium\net\http;
 
+use \Exception;
 use \radium\core\ClassLoader;
 use \radium\core\Object;
 use \radium\errors\NotFoundError;
@@ -27,54 +28,9 @@ final class Router extends Object
 	
 	public static function get($url, array $args = array())
 	{
-		$arg = array_shift($args);
-		
-		$controller = null;
-		if (preg_match('/^[a-zA-Z]/', $arg)) {
-			// コントローラのチェック
-			if (preg_match('/^[a-zA-Z]/', $arg)) {
-				$controller = $arg;
-				
-				// コントローラクラス
-				$controllerClass = 'app\\controllers\\' . StringUtil::camelcase($controller) . 'Controller';
-				
-				$result = ClassLoader::load($controllerClass, false);
-				
-				// コントローラクラスが見つかった
-				if ($result === true && class_exists($controllerClass)) {
-					// アクションのチェック
-					if (count($args) > 0) {
-						$arg = array_shift($args);
-						if (preg_match('/^[a-zA-Z]/', $arg)
-							&& !in_array($arg, explode(' ', 'render redirect content json'))) {
-							$action = $arg;
-						} else {
-							$action = 'index';
-							array_unshift($args, $arg);
-						}
-					} else {
-						$action = 'index';
-						array_unshift($args, $arg);
-						
-						$route = array(
-							'controller' => $controller,
-							'action' => $action,
-							'args' => $args
-						);
-						return $route;
-					}
-				} else {
-					array_unshift($args, $controller);
-					$controller = null;
-				}
-			} else {
-				array_unshift($args, $arg);
-			}
-		} else if ($arg != '') {
-			array_unshift($args, $arg);
-		}
-		
 		$routes = static::$_routes;
+		
+		$url = urldecode($url);
 		
 		if (isset($routes[$url])) {
 			$route = $routes[$url];
@@ -83,15 +39,19 @@ final class Router extends Object
 		}
 		
 		foreach ($routes as $key => $route) {
-			// {:Model:column}
-			preg_match_all('/\\{:([a-zA-Z0-9]+):([a-zA-Z0-9]+)\\}/', $key, $matches);
+			
+			$checkKey = $key;
+			$checkDataData = array();
+			$checkDataRegexp = array();
+			$checkDataArg = array();
+			
+			// {:Model:Column}
+			preg_match_all('/\{:([a-zA-Z0-9]+):([_a-zA-Z0-9]+)\}/', $key, $matches);
 			if ($matches && count($matches) > 0 && count($matches[0]) > 0) {
-				$checkKey = $key;
-				$checkData = array();
 				$n = count($matches[0]);
 				for ($i = 0; $i < $n; $i++) {
 					$param = $matches[0][$i];
-					$checkKey = str_replace($param, '______param_____', $checkKey);
+					$checkKey = str_replace($param, '______data_____', $checkKey);
 					
 					$model = $matches[1][$i];
 					$column = $matches[2][$i];
@@ -102,79 +62,139 @@ final class Router extends Object
 					
 					// モデルクラスが見つかった
 					if ($result === true && class_exists($modelClass)) {
-						$checkData[] = array($modelClass, $column);
+						$checkDataData[] = array('data', $modelClass, $column);
 					} else {
 						throw new NotFoundError(StringUtil::getLocalizedString('Model Class "{1}" is not found. ({2} at {2})', array($modelClass, __FILE__, __LINE__)), ACTION_NOT_FOUND);
-					}
-				}
-				
-				$checkKey = preg_quote($checkKey);
-				$checkKey = str_replace('/', '\\/', $checkKey);
-				$checkKey = str_replace('______param_____', '([-_.+a-zA-Z0-9]+)', $checkKey);
-				
-				if (preg_match('/^' . $checkKey . '$/', $url, $matches)) {
-					$data = array();
-					$exists = false;
-					array_shift($matches);
-					$n = count($matches);
-					for ($i = 0; $i < $n; $i++) {
-						$modelClass = $checkData[$i][0];
-						$column = $checkData[$i][1];
-						
-						$value = $matches[$i];
-						
-						$extra = array();
-						if (count($data) > 0) {
-							$target = count($data) > 0 ? $data[count($data) - 1] : null;
-							if (!$target || count($target) == 0) {
-								$data[] = null;
-								continue;
-							}
-							
-							$target = $target[0];
-							
-							$model = basename(str_replace('\\', '/', get_class($target)));
-							$model = StringUtil::uncamelcase($model);
-							
-							$relationKey = defined('RADIUM_RELATION_KEY') ? RADIUM_RELATION_KEY : '_id';
-							$targetValue = $target->$relationKey;
-							$extra[$model . '_id'] = $targetValue;
-						}
-						
-						$result = $modelClass::all(array('conditions' => array($column => $value) + $extra));
-						if ((!$result || count($result) == 0) && preg_match('/^\\d+(\\.\\d+)?$/', $value)) {
-							$result = $modelClass::all(array('conditions' => array($column => floatval($value)) + $extra));
-						}
-						if ((!$result || count($result) == 0) && preg_match('/^(true|false)$/', $value)) {
-							$result = $modelClass::all(array('conditions' => array($column => ($value == 'true')) + $extra));
-						}
-						
-						$data[] = $result;
-						if ($result && count($result) > 0) {
-							$exists = true;
-						}
-					}
-					if ($exists) {
-						$route['args'] = $data;
-						return $route;
 					}
 				}
 			}
 			
 			// {:args}
-			if (strpos($key, '{:args}') !== false) {
-				$key = str_replace('{:args}', '______args_____', $key);
-				$key = preg_quote($key);
-				$key = str_replace('/', '\\/', $key);
-				$key = str_replace('______args_____', '([-_.+a-zA-Z0-9%]+)', $key);
+			$checkKey = preg_replace_callback('/\{:args?\}/',
+				function($matches) use (&$checkDataArg) {
+					$checkDataArg[] = array('arg');
+					return '______arg_____';
+				}, $checkKey);
 				
-				if (preg_match('/^' . $key . '$/', $url, $matches)) {
-					array_shift($matches);
-					foreach ($matches as &$str) $str = urldecode($str);
-					$route['args'] = $matches;
+			// {:regexp}
+			$regexpList = array();
+			$checkKey = preg_replace_callback('/\{\:\/((?:[-+*.?,|\/a-zA-Z0-9]|\\\\|\\{|\\}|\\(|\\)|\\[|\\])*)\/\}/',
+				function($matches) use (&$regexpList, &$checkDataRegexp) {
+					$regexp = $matches[1];
+					$regexp = str_replace('\\(', '_____regexp_escape_____', $regexp);
+					$regexp = str_replace('(', '(?:', $regexp);
+					$regexp = str_replace('_____regexp_escape_____', '\\(', $regexp);
+					$regexpList[] = $regexp;
+					$checkDataRegexp[] = array('regexp');
+					return '______regexp_____';
+				},
+				$checkKey);
+			
+			// checkData を並び替えながら準備
+			$checkData = array();
+			preg_match_all('/______(data|arg|regexp)_____/', $checkKey, $matches);
+			if ($matches && count($matches[0]) > 0) {
+				for ($i = 0; $i < count($matches[0]); $i++) {
+					switch ($matches[1][$i]) {
+						case 'data': $checkData[] = array_shift($checkDataData); break;
+						case 'arg': $checkData[] = array_shift($checkDataArg); break;
+						case 'regexp': $checkData[] = array_shift($checkDataRegexp); break;
+					}
+				}
+			}
+			
+			$checkKey = preg_quote($checkKey);
+			$checkKey = str_replace('/', '\\/', $checkKey);
+			
+			// {:Model:Column} を戻す
+			$checkKey = str_replace('______data_____', '([^\\/]+)', $checkKey);
+			
+			// {:args} を戻す
+			$checkKey = str_replace('______arg_____', '([^\\/]+)', $checkKey);
+			
+			// {:regexp} を戻す
+			$checkKey = preg_replace_callback('/______regexp_____/',
+			function($matches) use (&$regexpList) {
+				return '(' . array_shift($regexpList) . ')';
+			},
+			$checkKey);
+			
+			$matches = null;
+			if (count($checkData) > 0) {
+				//echo $checkKey . "\n";
+				//print_r($checkData);
+				try {
+					preg_match('/^' . $checkKey . '$/', $url, $matches);
+				} catch (Exception $e) {
+				}
+			}
+			
+			if ($matches && count($matches) > 0) {
+				$resultArgs = array();
+				array_shift($matches);
+				$n = count($matches);
+				for ($i = 0; $i < $n; $i++) {
+					$type = $checkData[$i][0];
+					$value = $matches[$i];
+					
+					if ($type == 'data') {
+						$modelClass = $checkData[$i][1];
+						$column = $checkData[$i][2];
+						
+						$result = null;
+						if ((!$result || count($result) == 0) && preg_match('/^\\d+(\\.\\d+)?$/', $value)) {
+							$result = $modelClass::all(array('conditions' => array($column => floatval($value))));
+						}
+						if (!$result || count($result) == 0) {
+							$result = $modelClass::all(array('conditions' => array($column => $value)));
+						}
+						if ((!$result || count($result) == 0) && preg_match('/^(true|false)$/', $value)) {
+							$result = $modelClass::all(array('conditions' => array($column => ($value == 'true'))));
+						}
+						
+						//header('Content-Type: text/plain;charset=UTF-8');print_r(array('conditions' => array($column => $value) + $extra));exit;
+						
+						if ($result && count($result) > 0) {
+							$resultArgs[] = $result;
+						} else {
+							break;
+						}
+					} else if ($type == 'arg') {
+						$resultArgs[] = $value;
+					} else if ($type == 'regexp') {
+						$resultArgs[] = $value;
+					}
+				}
+				
+				if (count($resultArgs) == count($matches)) {
+					$route['args'] = $resultArgs;
 					return $route;
 				}
 			}
+		}
+		
+		// 
+		$controller = null;
+		$arg = array_shift($args);
+		if (preg_match('/^[a-zA-Z][_a-zA-Z0-9]*$/', $arg)) {
+			$controller = $arg;
+			
+			// アクションのチェック
+			if (count($args) > 0) {
+				$arg = array_shift($args);
+				if (preg_match('/^[a-zA-Z][_a-zA-Z0-9]*$/', $arg)
+					&& !in_array($arg, explode(' ', 'render redirect content json'))) {
+					$action = $arg;
+				} else {
+					$action = 'index';
+					array_unshift($args, $arg);
+				}
+			} else {
+				$action = 'index';
+				array_unshift($args, $arg);
+			}
+		} else {
+			array_unshift($args, $arg);
 		}
 		
 		// コントローラがあったら、、
@@ -187,11 +207,6 @@ final class Router extends Object
 			return $route;
 		}
 		
-		$route = array();
-		$route['controller'] = array_shift($args);
-		$route['action'] = array_shift($args);
-		$route['args'] = $args;
-		
-		return $route;
+		return false;
 	}
 }

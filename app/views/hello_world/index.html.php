@@ -13,4 +13,8 @@
 </ul>
 <section>
 	<h2><?php ee(ll('Hello World!')); ?></h2>
+	
+	<?php for ($i = 0; $i < 100; $i++): ?>
+	<p><?php ee(ll('Hello World!')); ?></p>
+	<?php endfor; ?>
 </section>

@@ -69,9 +69,15 @@ final class Dispatcher extends Object
 		
 		// URI を分割します
 		$args = strlen(substr($uri, 1)) > 0 ? explode('/', substr($uri, 1)) : array();
+		foreach ($args as &$arg) $arg = urldecode($arg);
 		
 		// ルーティング
 		$route = Router::get($uri, $args);
+		
+		if ($route === false) {
+			throw new NotFoundError(StringUtil::getLocalizedString('Not Found.'));
+		}
+		
 		$controller = $route['controller'];
 		$action = $route['action'];
 		$args = $route['args'];

@@ -10,7 +10,6 @@ namespace app\controllers;
 
 use \radium\errors\NotFoundError;
 use \radium\errors\UserError;
-use \radium\utils\StringUtil;
 
 class ErrorController extends \radium\action\Controller
 {
@@ -18,15 +17,19 @@ class ErrorController extends \radium\action\Controller
 	{
 		// データベースダウン
 		if (strpos($exception->getMessage(), 'mongodb') !== false) {
-			return StringUtil::getLocalizedString('Sorry, Database is down...');
+			return ll('Sorry, Database is down...');
 		}
+		
+		$title = ll('Error');
+		$errorMessage = ll('Sorry, Internal Server Error.');
 		
 		if ($exception instanceof NotFoundError) {
 			header("HTTP/1.0 404 Not Found");
 			header("Status: 404 Not Found");
+			
+			$title = ll('Not Found.');
+			$errorMessage = ll('Not Found.');
 		}
-		
-		$errorMessage = StringUtil::getLocalizedString('Sorry, Internal Server Error.');
 		
 		if ($exception instanceof UserError) {
 			$errorMessage = $exception->getMessage();
@@ -34,6 +37,6 @@ class ErrorController extends \radium\action\Controller
 			$errorMessage .= ' (' . $exception->getMessage() . ')';
 		}
 		
-		return compact('exception', 'errorMessage');
+		return compact('exception', 'title', 'errorMessage');
 	}
 }

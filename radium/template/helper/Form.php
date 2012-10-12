@@ -93,7 +93,7 @@ class Form extends Helper
 		$replace = array(
 			'name' => $name,
 			'options' => $options,
-			'value' => $value
+			'value' => $this->escape($value),
 		);
 		
 		return $this->_replace($tag, $replace);

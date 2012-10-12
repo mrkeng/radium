@@ -8,7 +8,7 @@
 
 namespace radium\core;
 
-use \radium\errors\NotFoundError;
+use \ErrorException;
 use \radium\utils\StringUtil;
 
 /**
@@ -49,7 +49,7 @@ final class ClassLoader extends Object
 		}
 		
 		if ($fireExceptionIfNeeded) {
-			throw new NotFoundError(StringUtil::getLocalizedString('Class file "{1}" is not found.', array($classFile)), CLASSFILE_NOT_FOUND);
+			throw new ErrorException(StringUtil::getLocalizedString('Class file "{1}" is not found.', array($classFile)), CLASSFILE_NOT_FOUND);
 		}
 		
 		return false;

@@ -164,6 +164,10 @@ class View extends Object
 	 */
 	private function params($name, $value = null)
 	{
+		return $this->param($name, $value);
+	}
+	private function param($name, $value = null)
+	{
 		if ($value !== null) {
 			$this->params[$name] = $value;
 		}

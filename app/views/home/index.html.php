@@ -12,8 +12,9 @@
 	<article>
 		<ul>
 			<li><?php echo $this->html->link(ll('Hello World'), 'hello_world'); ?></li>
-			<li><?php echo $this->html->link('Routes Test 1', 'hello'); ?></li>
-			<li><?php echo $this->html->link('Routes Test 2', 's/barfoo'); ?></li>
+			<li><?php echo $this->html->link('Not Exist Page', 'example'); ?></li>
+			<li><?php echo $this->html->link('Routes Test 1', 's/barfoo'); ?></li>
+			<li><?php echo $this->html->link('Routes Test 2', 'hello'); ?></li>
 			<li><?php echo $this->html->link('JSON Render Test', 'hello_world/show_json/foobar'); ?></li>
 		</ul>
 	</article>
