@@ -131,7 +131,7 @@ final class Dispatcher extends Object
 			throw new NotFoundError(StringUtil::getLocalizedString('Action "{1}" is not found. (Controller: {2})', array($action, $controllerClass)), ACTION_NOT_FOUND);
 		}
 		
-		$controllerObj->_render['template'] = $action;
+		$controllerObj->template = $action;
 		$controllerObj->invokeMethod('_init');
 		$data = @call_user_func_array(array($controllerObj, $callAction), $args);
 		

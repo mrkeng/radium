@@ -61,13 +61,14 @@ class View extends Object
 		}
 		
 		// layout
-		$layoutFile = $layout . '.' . $type . '.php';
+		if ($layout) {
+			$layoutFile = $layout . '.' . $type . '.php';
+			$this->layoutFile = RADIUM_APP_PATH . '/views/layouts/' . $layoutFile;
+		}
 		
 		// template
 		$templateFile = $controller->_controller . '/'
 			. $template . '.' . $type . '.php';
-		
-		$this->layoutFile = RADIUM_APP_PATH . '/views/layouts/' . $layoutFile;
 		$this->templateFile = RADIUM_APP_PATH . '/views/' . $templateFile;
 		
 		// ヘルパー
@@ -96,6 +97,9 @@ class View extends Object
 		}
 		
 		$this->content = $this->_render($this->templateFile);
+		if (!$this->layoutFile) {
+			return $this->content;
+		}
 		return $this->_render($this->layoutFile);
 	}
 	

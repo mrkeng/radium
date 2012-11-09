@@ -54,4 +54,12 @@ class HelloWorldController extends AbstractBaseController
 		
 		$this->json($json);
 	}
+	
+	/**
+	 * リクエストヘッダを表示
+	 */
+	public function headers()
+	{
+		$this->print_r($this->request->headers);
+	}
 }

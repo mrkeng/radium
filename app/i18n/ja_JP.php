@@ -25,5 +25,6 @@ $radiumLocaleResources['ja_JP'] = array(
 	'Default Language of Web Browser' => 'ウェブブラウザの標準言語',
 	'Back' => '戻る',
 	'Hello World' => 'こんにちは、世界',
-	'Hello World!' => 'こんにちは、世界！'
+	'Hello World!' => 'こんにちは、世界！',
+	'Request Headers' => 'リクエスト・ヘッダ',
 );

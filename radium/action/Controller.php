@@ -22,6 +22,9 @@ class Controller extends Object
 	public $view;
 	public $request;
 	public $dispatcher;
+	public $type = 'html';
+	public $layout = 'default';
+	public $template = '';
 	public $_controller;
 	public $_render;
 	protected $_renderedContent = '';
@@ -44,6 +47,11 @@ class Controller extends Object
 				
 		$this->_render = array();
 		$this->_params = array();
+		
+		$headers = $request->headers;
+		if (isset($headers['X-PJAX'])) {
+			$this->layout = null;
+		}
 	}
 	
 	/**
@@ -98,12 +106,21 @@ class Controller extends Object
 		if ($this->_renderedContent) return;
 		
 		$default = array(
-			'type' => 'html',
-			'layout' => 'default',
 			'controller' => $this->_controller,
-			'template' => null,
 			'data' => array()
 		);
+		
+		$additionals = array();
+		if ($this->type) {
+			$additionals['type'] = $this->type;
+		}
+		if ($this->layout) {
+			$additionals['layout'] = $this->layout;
+		}
+		if ($this->template) {
+			$additionals['template'] = $this->template;
+		}
+		$options += $additionals;
 		
 		$options += $this->_render;
 		$options += $default;

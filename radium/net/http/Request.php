@@ -68,10 +68,17 @@ final class Request extends Object
 			$domain .= ':' . $_SERVER['SERVER_PORT'];
 		}
 		
+		$rawHeaders = getallheaders();
+		$headers = array();
+		while (list($header, $value) = each($rawHeaders)) {
+			$headers[strtoupper($header)] =  $value;
+		}
+		
 		// data and query
 		$this->_config['domain'] = $domain;
 		$this->_config['appBaseURI'] = RADIUM_APP_BASE_URI;
 		$this->_config['base'] = $base;
+		$this->_config['headers'] = $headers;
 		$this->_config['data'] = $this->_config['query'] = array();
 		$this->_config['data'] += $_POST;
 		$this->_config['query'] += $_GET;
@@ -95,6 +102,8 @@ final class Request extends Object
 				return $this->_config['query'];
 			case 'queryString':
 				return $this->_config['queryString'];
+			case 'headers':
+				return $this->_config['headers'];
 		}
 		
 		throw new ErrorException(StringUtil::getLocalizedString('{1} is an illegal property.', array($name)), INVALID_PROPERTY);
